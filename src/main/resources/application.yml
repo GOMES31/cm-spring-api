@@ -26,5 +26,5 @@ logging:
 
 security:
   jwt:
-    secret-key:
+    secret-key: ${JWT_SECRET}
     expiration-time: 3600000 # 1 hour (60 minutes * 60 seconds * 1000 milliseconds
