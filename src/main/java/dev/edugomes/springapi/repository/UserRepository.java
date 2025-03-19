@@ -1,5 +1,6 @@
-package dev.edugomes.springapi.user;
+package dev.edugomes.springapi.repository;
 
+import dev.edugomes.springapi.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
