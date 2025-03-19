@@ -14,7 +14,7 @@ Esta API Spring Boot utiliza **JWT (JSON Web Token)** para autenticação e **My
 
 ### 1. Registo de Novo Utilizador
 
-**URL**: `http://localhost:8080/api/auth/register`
+**URL**: `http://localhost:8080/auth/register`
 
 **Body (JSON)**:
 ```json
