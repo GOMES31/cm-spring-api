@@ -155,8 +155,10 @@ public class AuthServiceImpl implements AuthService {
             // If user and token is valid creates new authToken
             if(jwtService.isTokenValid(refreshToken, user)){
                 String accessToken = jwtService.generateToken(user);
+                revokeAllUserTokens(user);
+                saveUserToken(user,accessToken);
 
-                AuthResponse authResponse = AuthResponse.builder()
+                var authResponse = AuthResponse.builder()
                         .name(user.getName())
                         .email(user.getEmail())
                         .accessToken(accessToken)
