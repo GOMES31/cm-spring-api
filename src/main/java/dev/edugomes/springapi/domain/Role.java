@@ -1,4 +1,4 @@
-package dev.edugomes.springapi.user;
+package dev.edugomes.springapi.domain;
 
 public enum Role {
     USER,

@@ -12,7 +12,7 @@ spring:
     hibernate:
       # Options:  None, Validate, Update, Create, Create-Drop
       ddl-auto: create
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -23,8 +23,15 @@ spring:
 logging:
   level:
     org.hibernate.SQL: OFF
+    org.springframework.security: DEBUG
+
+server:
+  servlet:
+    context-path: /api
 
 security:
   jwt:
     secret-key: ${JWT_SECRET}
-    expiration-time: 600000 # 600000 = 10min # 3600000 1 hour (60 minutes * 60 seconds * 1000 milliseconds)
+    expiration: 86400000 # 1 day
+    refresh-token:
+      expiration: 604800000 # 7 days

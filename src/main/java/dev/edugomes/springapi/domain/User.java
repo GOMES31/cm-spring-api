@@ -1,4 +1,4 @@
-package dev.edugomes.springapi.user;
+package dev.edugomes.springapi.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User implements UserDetails {
 
     @Id
@@ -34,6 +35,9 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

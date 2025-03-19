@@ -1,5 +1,6 @@
 package dev.edugomes.springapi.jwt;
 
+import dev.edugomes.springapi.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(
@@ -46,8 +48,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
+            // Retrieves the token from the database by its JWT value and checks if it's valid
+            // If no token is found, defaults to false.
+            boolean isTokenValid = tokenRepository.findByToken(jwt)
+                    .map(token -> !token.isExpired() && !token.isRevoked())
+                    .orElse(false);
+
             // If user and token is valid creates new authToken
-            if(jwtService.isTokenValid(jwt, userDetails)){
+            if(jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken  = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
