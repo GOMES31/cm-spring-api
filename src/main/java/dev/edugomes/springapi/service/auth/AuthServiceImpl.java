@@ -137,37 +137,44 @@ public class AuthServiceImpl implements AuthService {
             HttpServletResponse response
     ) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String userEmail;
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        refreshToken = authHeader.substring(7);
+        final String refreshToken = authHeader.substring(7);
+        final String userEmail = jwtService.extractUsername(refreshToken);
 
-        userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-        // Check if user doesn´t exist or if it isn't authenticated
-        if(userEmail != null) {
-            User user = this.userRepository.findByEmail(userEmail).orElseThrow();
 
-            // If user and token is valid creates new authToken
-            if(jwtService.isTokenValid(refreshToken, user)){
-                String accessToken = jwtService.generateToken(user);
-                revokeAllUserTokens(user);
-                saveUserToken(user,accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
 
-                var authResponse = AuthResponse.builder()
-                        .name(user.getName())
-                        .email(user.getEmail())
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
+        // If user and token is valid creates new authToken
+        if(jwtService.isTokenValid(refreshToken, user)){
+            String newAccessToken = jwtService.generateToken(user);
+            String newRefreshToken = jwtService.generateRefreshToken(user);
 
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-            }
+            revokeAllUserTokens(user);
+            saveUserToken(user,newAccessToken);
+            saveUserToken(user,newRefreshToken);
 
+            var authResponse = AuthResponse.builder()
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
+
+            new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+
+        } else{
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
 
     }

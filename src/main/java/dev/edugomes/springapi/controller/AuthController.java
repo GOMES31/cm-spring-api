@@ -73,11 +73,14 @@ public class AuthController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
-        authService.refreshToken(request,response);
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try{
+            authService.refreshToken(request,response);
+        } catch(UsernameNotFoundException e){
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch ( Exception e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
     }
 
 
