@@ -5,5 +5,5 @@ Esta API Spring Boot utiliza **JWT (JSON Web Token)** para autenticação e **My
 ### Tecnologias Utilizadas:
 - **Spring Boot 3.4.3**
 - **Spring Security** (para autenticação JWT)
-- **MySQL 8** (para gestão da base de dados)
+- **PostgreSQL** (para gestão da base de dados)
 - **JJWT** (para criação e verificação de tokens JWT)
