@@ -64,13 +64,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    database: postgres
+    database: POSTGRESQL
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-logging:
-  level:
-    org.hibernate.SQL: OFF
-    org.springframework.security: DEBUG
 
 server:
   servlet:
@@ -82,6 +77,7 @@ security:
     expiration: 86400000       # 1 day
     refresh-token:
       expiration: 604800000    # 7 days
+
 
 
 
