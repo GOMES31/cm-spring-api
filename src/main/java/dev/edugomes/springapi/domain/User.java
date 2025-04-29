@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,31 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeamMember> memberships = new ArrayList<>();
+
+    /**
+     * Annotation for database to ignore the list
+     */
+    @Transient
+    private List<Project> projects = new ArrayList<>();
+
+    /**
+     * Annotation for database to ignore the list
+     */
+    @Transient
+    private List<ProjectTask> tasks = new ArrayList<>();
+
+    /**
+     * Annotation for database to ignore the list
+     */
+    @Transient
+    private List<Observation> observations = new ArrayList<>();
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -46,6 +72,7 @@ public class User implements UserDetails {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
+
 
     // Default methods from UserDetails
     @Override

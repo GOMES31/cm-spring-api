@@ -1,29 +1,23 @@
 spring:
   application:
-    name: base-api
+    name: tasktrackr-api
 
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/base-api
-    username: apiCM
-    password: apiCM123
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/tasktrackr-api
+    username: tasktrackr_admin
+    password: 1234
 
   jpa:
     hibernate:
-      # Options:  None, Validate, Update, Create, Create-Drop
+      # Options: None, Validate, Update, Create, Create-Drop
       ddl-auto: create
     show-sql: false
     properties:
       hibernate:
         format_sql: true
-    database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
-
-# Log SQL statements
-logging:
-  level:
-    org.hibernate.SQL: OFF
-    org.springframework.security: DEBUG
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   servlet:
@@ -32,6 +26,6 @@ server:
 security:
   jwt:
     secret-key: ${JWT_SECRET}
-    expiration: 86400000 # 1 day
+    expiration: 86400000       # 1 day
     refresh-token:
-      expiration: 604800000 # 7 days
+      expiration: 604800000    # 7 days
