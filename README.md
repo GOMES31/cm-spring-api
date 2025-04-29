@@ -51,20 +51,21 @@ spring:
     name: tasktrackr-api
 
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/tasktrackr-api
-    username: tasktrackr-admin
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/tasktrackr_api
+    username: tasktrackr_admin
     password: 1234
 
   jpa:
     hibernate:
+      # Options: None, Validate, Update, Create, Create-Drop
       ddl-auto: create
     show-sql: false
     properties:
       hibernate:
         format_sql: true
-    database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database: postgres
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 logging:
   level:
@@ -81,5 +82,6 @@ security:
     expiration: 86400000       # 1 day
     refresh-token:
       expiration: 604800000    # 7 days
+
 
 
