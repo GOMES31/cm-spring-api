@@ -52,7 +52,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/tasktrackr_api
+    url: jdbc:postgresql://localhost:5432/tasktrackr-api
     username: tasktrackr_admin
     password: 1234
 
