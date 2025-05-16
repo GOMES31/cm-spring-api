@@ -8,8 +8,7 @@ import lombok.Data;
 @Builder
 public class AuthResponse {
 
-    private String name;
-
+    @JsonProperty("email")
     private String email;
 
     @JsonProperty("access_token")

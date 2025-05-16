@@ -3,8 +3,8 @@ package dev.edugomes.springapi.service.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.edugomes.springapi.domain.Token;
 import dev.edugomes.springapi.domain.TokenType;
-import dev.edugomes.springapi.dto.request.LoginRequest;
-import dev.edugomes.springapi.dto.request.RegisterRequest;
+import dev.edugomes.springapi.dto.request.SignInRequest;
+import dev.edugomes.springapi.dto.request.SignUpRequest;
 import dev.edugomes.springapi.exception.UserAlreadyExistsException;
 import dev.edugomes.springapi.jwt.JwtService;
 import dev.edugomes.springapi.domain.Role;
@@ -62,16 +62,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse registerUser(RegisterRequest registerRequest) {
+    public AuthResponse registerUser(SignUpRequest signUpRequest) {
 
-        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+        if(userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
 
         User user = User.builder()
-                .name(registerRequest.getName())
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .name(signUpRequest.getName())
+                .email(signUpRequest.getEmail())
+                .password(passwordEncoder.encode(signUpRequest.getPassword()))
                 .role(Role.USER)
                 .build();
 
@@ -79,54 +79,52 @@ public class AuthServiceImpl implements AuthService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        registerRequest.getEmail(),
-                        registerRequest.getPassword()
+                        signUpRequest.getEmail(),
+                        signUpRequest.getPassword()
                 )
         );
 
-        var jwtToken = jwtService.generateToken(user);
+        var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
-        saveUserToken(savedUser, jwtToken);
+        saveUserToken(savedUser, accessToken);
 
         return AuthResponse.builder()
-                .name(savedUser.getName())
-                .email(savedUser.getEmail())
-                .accessToken(jwtToken)
+                .email(signUpRequest.getEmail())
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
 
 
 
-    public AuthResponse authenticateUser(LoginRequest loginRequest) {
+    public AuthResponse authenticateUser(SignInRequest signInRequest) {
 
-        User user = userRepository.findByEmail(loginRequest.getEmail())
+        User user = userRepository.findByEmail(signInRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "User not found: " + loginRequest.getEmail()));
+                        "User not found: " + signInRequest.getEmail()));
 
         // Check if the provided password matches the stored password
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(signInRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
+                        signInRequest.getEmail(),
+                        signInRequest.getPassword()
                 )
         );
 
-        var jwtToken = jwtService.generateToken(user);
+        var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
         revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
+        saveUserToken(user, accessToken);
 
         return AuthResponse.builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .accessToken(jwtToken)
+                .email(signInRequest.getEmail())
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
@@ -165,8 +163,7 @@ public class AuthServiceImpl implements AuthService {
             saveUserToken(user,newRefreshToken);
 
             var authResponse = AuthResponse.builder()
-                    .name(user.getName())
-                    .email(user.getEmail())
+                    .email(userEmail)
                     .accessToken(newAccessToken)
                     .refreshToken(newRefreshToken)
                     .build();
