@@ -74,9 +74,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
+    // Allow for external apps to consume auth endpoints, otherwise it will return forbidden error
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-
         return request.getServletPath().startsWith("/auth/");
     }
 }
