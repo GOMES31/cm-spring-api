@@ -8,6 +8,9 @@ import lombok.Data;
 @Builder
 public class AuthResponse {
 
+    @JsonProperty("name")
+    private String name;
+
     @JsonProperty("email")
     private String email;
 

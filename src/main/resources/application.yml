@@ -4,14 +4,14 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/tasktrackr-api
+    url: jdbc:postgresql://localhost:5432/tasktrackr-api 
     username: tasktrackr_admin
     password: 1234
 
   jpa:
     hibernate:
       # Options: None, Validate, Update, Create, Create-Drop
-      ddl-auto: create
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:

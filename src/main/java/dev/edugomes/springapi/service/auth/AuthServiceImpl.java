@@ -90,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
         saveUserToken(savedUser, accessToken);
 
         return AuthResponse.builder()
+                .name(savedUser.getName())
                 .email(signUpRequest.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -123,6 +124,7 @@ public class AuthServiceImpl implements AuthService {
         saveUserToken(user, accessToken);
 
         return AuthResponse.builder()
+                .name(user.getName())
                 .email(signInRequest.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -163,6 +165,7 @@ public class AuthServiceImpl implements AuthService {
             saveUserToken(user,newRefreshToken);
 
             var authResponse = AuthResponse.builder()
+                    .name(user.getName())
                     .email(userEmail)
                     .accessToken(newAccessToken)
                     .refreshToken(newRefreshToken)
