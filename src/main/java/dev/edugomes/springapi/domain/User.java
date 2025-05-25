@@ -40,8 +40,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
-    @Column(name = "profile_picture")
-    private String profilePicture;
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

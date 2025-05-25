@@ -36,7 +36,8 @@ public class AuthServiceImpl implements AuthService {
     private final TokenRepository tokenRepository;
 
 
-    private void revokeAllUserTokens(User user) {
+    @Override
+    public void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
 
         if(validUserTokens.isEmpty()) {
@@ -50,7 +51,9 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.saveAll(validUserTokens);
     }
-    private void saveUserToken(User user, String jwtToken) {
+
+    @Override
+    public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
@@ -92,6 +95,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .name(savedUser.getName())
                 .email(signUpRequest.getEmail())
+                .avatarUrl(savedUser.getAvatarUrl())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -126,6 +130,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .name(user.getName())
                 .email(signInRequest.getEmail())
+                .avatarUrl(user.getAvatarUrl())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -167,6 +172,7 @@ public class AuthServiceImpl implements AuthService {
             var authResponse = AuthResponse.builder()
                     .name(user.getName())
                     .email(userEmail)
+                    .avatarUrl(user.getAvatarUrl())
                     .accessToken(newAccessToken)
                     .refreshToken(newRefreshToken)
                     .build();
