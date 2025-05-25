@@ -6,8 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AuthResponse {
-
+public class UpdateUserProfileResponse {
     @JsonProperty("name")
     private String name;
 
@@ -21,5 +20,4 @@ public class AuthResponse {
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
-
 }
