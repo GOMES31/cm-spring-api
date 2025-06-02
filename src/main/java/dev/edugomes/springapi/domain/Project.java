@@ -43,5 +43,6 @@ public class Project {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<ProjectTask> tasks = new ArrayList<>();
 }

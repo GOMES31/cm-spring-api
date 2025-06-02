@@ -49,6 +49,7 @@ public class ProjectTask {
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "team_member_id")
     )
+    @Builder.Default
     private List<TeamMember> assignees = new ArrayList<>();
 
     @OneToMany(
@@ -56,5 +57,6 @@ public class ProjectTask {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<Observation> observations = new ArrayList<>();
 }
