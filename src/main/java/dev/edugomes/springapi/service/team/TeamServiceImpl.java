@@ -60,4 +60,21 @@ public class TeamServiceImpl implements TeamService {
 
         return Mapper.toTeamResponse(team);
     }
+
+    @Override
+    public TeamResponse getTeamById(Long teamId) {
+        String userEmail = getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new UserNotFoundException("Team not found"));
+
+        if (team.getMembers().stream().noneMatch(member -> member.getUser().getId().equals(user.getId()))) {
+            throw new UserNotFoundException("User is not a member of this team");
+        }
+
+        return Mapper.toTeamResponse(team);
+    }
 }

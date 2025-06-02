@@ -7,4 +7,6 @@ import dev.edugomes.springapi.dto.response.TeamResponse;
 public interface TeamService {
 
     TeamResponse create(CreateTeamRequest request);
+
+    TeamResponse getTeamById(Long teamId);
 }
