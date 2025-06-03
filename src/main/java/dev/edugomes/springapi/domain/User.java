@@ -60,6 +60,10 @@ public class User implements UserDetails {
         memberships.add(membership);
     }
 
+    public void removeMembership(TeamMember membership) {
+        memberships.remove(membership);
+    }
+
     // Default methods from UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
