@@ -3,6 +3,7 @@ package dev.edugomes.springapi.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,17 +24,25 @@ public class Team {
     @Column(nullable = false)
     private String name;
 
-    private String description;
+    private String department;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false, name = "created_at")
     private Date createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Date updatedAt;
 
     @OneToMany(
             mappedBy = "team",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<TeamMember> members = new ArrayList<>();
 
 
@@ -42,5 +51,14 @@ public class Team {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<Project> projects = new ArrayList<>();
+
+    public void addMember(TeamMember member) {
+        members.add(member);
+    }
+
+    public void removeMember(TeamMember member) {
+        members.remove(member);
+    }
 }

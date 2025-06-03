@@ -1,29 +1,35 @@
 package dev.edugomes.springapi.service.user;
+import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.dto.request.UpdateUserProfileRequest;
-import dev.edugomes.springapi.dto.response.UpdateUserProfileResponse;
+import dev.edugomes.springapi.dto.response.TeamResponse;
+import dev.edugomes.springapi.dto.response.UserProfileResponse;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.exception.UserNotFoundException;
-import dev.edugomes.springapi.jwt.JwtService;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.UserRepository;
-import dev.edugomes.springapi.service.auth.AuthService;
+import dev.edugomes.springapi.service.log.LogService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static dev.edugomes.springapi.util.GlobalMethods.getCurrentUserEmail;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final JwtService jwtService;
-    private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
+    private final LogService logService;
+
+
 
     @Override
-    public UpdateUserProfileResponse updateProfile(UpdateUserProfileRequest request) {
+    public UserProfileResponse updateProfile(UpdateUserProfileRequest request) {
         String email = getCurrentUserEmail();
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -33,26 +39,35 @@ public class UserServiceImpl implements UserService {
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
+
+
         if (request.getAvatarUrl() != null && !request.getAvatarUrl().isEmpty()) {
             user.setAvatarUrl(request.getAvatarUrl());
         }
 
-        var accessToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-
-        authService.revokeAllUserTokens(user);
-        authService.saveUserToken(user, accessToken);
         userRepository.save(user);
 
-        return UpdateUserProfileResponse.builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .avatarUrl(user.getAvatarUrl())
-                .build();
+        logService.saveLog("Update user profile",email);
+
+        return CustomMapper.toUserProfileResponse(user);
     }
 
-    private String getCurrentUserEmail() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth.getName();
+    @Override
+    public List<TeamResponse> getTeams() {
+        String email = getCurrentUserEmail();
+
+        if(email == null || email.isEmpty()) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        logService.saveLog("Get User Teams", email);
+
+        List<Team> teams = userRepository.findTeamsByUserEmail(email);
+        return teams.stream()
+                .map(CustomMapper::toTeamResponse)
+                .toList();
     }
+
+
 }
+

@@ -1,14 +1,15 @@
-package dev.edugomes.springapi.dto.request;
+package dev.edugomes.springapi.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class UpdateUserProfileRequest {
-
+@Builder
+public class UserProfileResponse {
     private String name;
 
-    private String password;
+    private String email;
 
     @JsonProperty("avatar_url")
     private String avatarUrl;

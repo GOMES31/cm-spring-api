@@ -45,25 +45,8 @@ public class User implements UserDetails {
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<TeamMember> memberships = new ArrayList<>();
-
-    /**
-     * Annotation for database to ignore the list
-     */
-    @Transient
-    private List<Project> projects = new ArrayList<>();
-
-    /**
-     * Annotation for database to ignore the list
-     */
-    @Transient
-    private List<ProjectTask> tasks = new ArrayList<>();
-
-    /**
-     * Annotation for database to ignore the list
-     */
-    @Transient
-    private List<Observation> observations = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -73,6 +56,13 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    public void addMembership(TeamMember membership) {
+        memberships.add(membership);
+    }
+
+    public void removeMembership(TeamMember membership) {
+        memberships.remove(membership);
+    }
 
     // Default methods from UserDetails
     @Override

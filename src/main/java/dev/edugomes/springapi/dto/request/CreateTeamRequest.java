@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class UpdateUserProfileRequest {
+public class CreateTeamRequest {
 
     private String name;
 
-    private String password;
+    private String department;
 
-    @JsonProperty("avatar_url")
-    private String avatarUrl;
+    @JsonProperty("image_url")
+    private String imageUrl;
 }

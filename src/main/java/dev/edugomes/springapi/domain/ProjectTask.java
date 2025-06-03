@@ -3,6 +3,7 @@ package dev.edugomes.springapi.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.ArrayList;
@@ -43,12 +44,21 @@ public class ProjectTask {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
     @ManyToMany
     @JoinTable(
             name = "task_assignees",
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "team_member_id")
     )
+    @Builder.Default
     private List<TeamMember> assignees = new ArrayList<>();
 
     @OneToMany(
@@ -56,5 +66,6 @@ public class ProjectTask {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<Observation> observations = new ArrayList<>();
 }
