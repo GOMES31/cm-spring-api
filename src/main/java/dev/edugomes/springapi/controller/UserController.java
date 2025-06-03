@@ -28,7 +28,7 @@ public class UserController {
     private static final String UPDATE_PROFILE = "/update-profile";
     private static final String GET_TEAMS = "/teams";
 
-    @PutMapping(
+    @PatchMapping(
             value = UPDATE_PROFILE,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE

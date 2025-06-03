@@ -27,6 +27,7 @@ public class Mapper {
                 .id(member.getId())
                 .name(member.getUser().getName())
                 .email(member.getUser().getEmail())
+                .avatarUrl(member.getUser().getAvatarUrl())
                 .role(member.getRole().toString())
                 .build();
     }

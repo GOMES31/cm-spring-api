@@ -16,6 +16,9 @@ public class TeamMemberResponse {
 
     private String email;
 
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
     private String role;
 }
 
