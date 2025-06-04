@@ -60,6 +60,10 @@ public class User implements UserDetails {
         memberships.add(membership);
     }
 
+    public void removeMembership(TeamMember membership) {
+        memberships.remove(membership);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

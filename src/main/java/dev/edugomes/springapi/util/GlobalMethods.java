@@ -7,6 +7,7 @@ public class GlobalMethods {
 
     public static String getCurrentUserEmail() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         return auth.getName();
     }
 }

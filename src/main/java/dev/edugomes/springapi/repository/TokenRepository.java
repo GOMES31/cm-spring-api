@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
 
-    // Retrieves all tokens for the specified user that are valid ( not expired or not revoked)
+    // Retrieves all valid tokens for the specified user (not expired or not revoked)
     @Query(value = """
       select t from Token t inner join User u
       on t.user.id = u.id

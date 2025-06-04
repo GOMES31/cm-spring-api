@@ -1,10 +1,14 @@
 package dev.edugomes.springapi.service.user;
+
 import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.dto.request.UpdateUserProfileRequest;
-import dev.edugomes.springapi.dto.response.UpdateUserProfileResponse;
+import dev.edugomes.springapi.dto.response.TeamResponse;
+import dev.edugomes.springapi.dto.response.UserProfileResponse;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.exception.UserNotFoundException;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.UserRepository;
+import dev.edugomes.springapi.service.log.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,13 +24,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-
+    private final LogService logService;
 
     @Override
-    public UpdateUserProfileResponse updateProfile(UpdateUserProfileRequest request) {
-
-
+    public UserProfileResponse updateProfile(UpdateUserProfileRequest request) {
         String email = getCurrentUserEmail();
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -42,26 +45,29 @@ public class UserServiceImpl implements UserService {
             user.setAvatarUrl(request.getAvatarUrl());
         }
 
-
         userRepository.save(user);
 
-        return UpdateUserProfileResponse.builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .avatarUrl(user.getAvatarUrl())
-                .build();
+        logService.saveLog("Update user profile",email);
+
+        return CustomMapper.toUserProfileResponse(user);
     }
 
     @Override
-    public List<Team> getTeams() {
+    public List<TeamResponse> getTeams() {
         String email = getCurrentUserEmail();
 
         if(email == null || email.isEmpty()) {
             throw new UserNotFoundException("User not found");
         }
 
-        return userRepository.findTeamsByUserEmail(email);
+        logService.saveLog("Get User Teams", email);
+
+        List<Team> teams = userRepository.findTeamsByUserEmail(email);
+        return teams.stream()
+                .map(CustomMapper::toTeamResponse)
+                .toList();
     }
 
 
 }
+

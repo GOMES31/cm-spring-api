@@ -44,17 +44,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         userEmail = jwtService.extractUsername(jwt);
 
-        // Check if user doesn´t exist or if it isn't authenticated
+        // Check if user exists and is not already authenticated
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
             // Retrieves the token from the database by its JWT value and checks if it's valid
-            // If no token is found, defaults to false.
+            // If no token is found, defaults to false
             boolean isTokenValid = tokenRepository.findByToken(jwt)
                     .map(token -> !token.isExpired() && !token.isRevoked())
                     .orElse(false);
 
-            // If user and token is valid creates new authToken
+            // If both user and token are valid, create a new authentication token
             if(jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken  = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -74,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-    // Allow for external apps to consume auth endpoints, otherwise it will return forbidden error
+    // Allow external applications to consume auth endpoints without token validation
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getServletPath().startsWith("/auth/");

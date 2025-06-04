@@ -10,8 +10,10 @@ import dev.edugomes.springapi.jwt.JwtService;
 import dev.edugomes.springapi.domain.Role;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.response.AuthResponse;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.TokenRepository;
 import dev.edugomes.springapi.repository.UserRepository;
+import dev.edugomes.springapi.service.log.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +32,15 @@ import java.io.IOException;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LogService logService;
     private final AuthenticationManager authenticationManager;
-    private final TokenRepository tokenRepository;
 
 
-    private void revokeAllUserTokens(User user) {
+    @Override
+    public void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
 
         if(validUserTokens.isEmpty()) {
@@ -50,7 +54,9 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.saveAll(validUserTokens);
     }
-    private void saveUserToken(User user, String jwtToken) {
+
+    @Override
+    public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
@@ -89,11 +95,9 @@ public class AuthServiceImpl implements AuthService {
 
         saveUserToken(savedUser, accessToken);
 
-        return AuthResponse.builder()
-                .email(signUpRequest.getEmail())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        logService.saveLog("Sign Up", savedUser.getEmail());
+
+        return CustomMapper.toAuthResponse(user, accessToken, refreshToken);
     }
 
 
@@ -104,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found: " + signInRequest.getEmail()));
 
-        // Check if the provided password matches the stored password
+        // Verify if the provided password matches the stored password
         if (!passwordEncoder.matches(signInRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
@@ -122,11 +126,9 @@ public class AuthServiceImpl implements AuthService {
         revokeAllUserTokens(user);
         saveUserToken(user, accessToken);
 
-        return AuthResponse.builder()
-                .email(signInRequest.getEmail())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        logService.saveLog("Sign In", user.getEmail());
+
+        return CustomMapper.toAuthResponse(user,accessToken,refreshToken);
     }
 
     @Override
@@ -153,7 +155,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
 
-        // If user and token is valid creates new authToken
+        // If both user and token are valid, create new authentication tokens
         if(jwtService.isTokenValid(refreshToken, user)){
             String newAccessToken = jwtService.generateToken(user);
             String newRefreshToken = jwtService.generateRefreshToken(user);
@@ -162,11 +164,7 @@ public class AuthServiceImpl implements AuthService {
             saveUserToken(user,newAccessToken);
             saveUserToken(user,newRefreshToken);
 
-            var authResponse = AuthResponse.builder()
-                    .email(userEmail)
-                    .accessToken(newAccessToken)
-                    .refreshToken(newRefreshToken)
-                    .build();
+            var authResponse = CustomMapper.toAuthResponse(user,newAccessToken,newRefreshToken);
 
             new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
 
