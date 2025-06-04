@@ -1,4 +1,5 @@
 package dev.edugomes.springapi.service.user;
+
 import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.dto.request.UpdateUserProfileRequest;
 import dev.edugomes.springapi.dto.response.TeamResponse;
@@ -22,9 +23,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     private final LogService logService;
-
-
 
     @Override
     public UserProfileResponse updateProfile(UpdateUserProfileRequest request) {

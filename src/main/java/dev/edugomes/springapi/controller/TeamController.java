@@ -23,12 +23,12 @@ public class TeamController {
 
     private final TeamService teamService;
 
-
     private static final String CREATE_TEAM = "/create";
     private static final String GET_TEAM_BY_ID = "/{teamId}";
     private static final String ADD_MEMBER = "/{teamId}/add-member";
     private static final String UPDATE_PROFILE = "/{teamId}/update-profile";
     private static final String REMOVE_MEMBER = "/{teamId}/remove-member/{memberId}";
+
 
     @PostMapping(
             value = CREATE_TEAM,
@@ -56,7 +56,6 @@ public class TeamController {
             return ResponseHandler.buildResponse("Could not retrieve team", HttpStatus.NOT_FOUND, null);
         }
     }
-
     @PostMapping(
             value = ADD_MEMBER,
             consumes = MediaType.APPLICATION_JSON_VALUE,

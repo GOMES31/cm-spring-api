@@ -57,7 +57,6 @@ public class Team {
     public void addMember(TeamMember member) {
         members.add(member);
     }
-
     public void removeMember(TeamMember member) {
         members.remove(member);
     }
