@@ -4,6 +4,7 @@ import dev.edugomes.springapi.domain.*;
 import dev.edugomes.springapi.dto.request.CreateProjectRequest;
 import dev.edugomes.springapi.dto.request.UpdateProjectRequest;
 import dev.edugomes.springapi.dto.response.ProjectResponse;
+import dev.edugomes.springapi.dto.response.TaskResponse;
 import dev.edugomes.springapi.exception.ProjectNotFoundException;
 import dev.edugomes.springapi.exception.UnauthorizedException;
 import dev.edugomes.springapi.repository.ProjectRepository;
@@ -11,12 +12,14 @@ import dev.edugomes.springapi.repository.TeamRepository;
 import dev.edugomes.springapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -30,7 +33,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         Team team = teamRepository.findById(createProjectRequest.getTeamId())
                 .orElseThrow(() -> new RuntimeException("Team not found"));
-
 
         boolean isAuthorized = team.getMembers().stream()
                 .anyMatch(member -> member.getUser().getEmail().equals(userEmail) &&
@@ -51,14 +53,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project savedProject = projectRepository.save(project);
         return convertToProjectResponse(savedProject);
-    }
-
-    @Override
-    public List<ProjectResponse> getAllProjectsByUser(String userEmail) {
-        List<Project> projects = projectRepository.findProjectsByUserEmail(userEmail);
-        return projects.stream()
-                .map(this::convertToProjectResponse)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -110,36 +104,19 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void deleteProject(Long id, String userEmail) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+    public List<TaskResponse> getTasksForProject(Long projectId, String userEmail) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + projectId));
 
-        boolean canDelete = project.getTeam().getMembers().stream()
-                .anyMatch(member -> member.getUser().getEmail().equals(userEmail) &&
-                        member.getRole() == TeamRole.ADMIN);
-
-        if (!canDelete) {
-            throw new UnauthorizedException("User not authorized to delete this project");
-        }
-
-        projectRepository.delete(project);
-    }
-
-    @Override
-    public List<ProjectResponse> getProjectsByTeam(Long teamId, String userEmail) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
-
-        boolean isMember = team.getMembers().stream()
+        boolean hasAccess = project.getTeam().getMembers().stream()
                 .anyMatch(member -> member.getUser().getEmail().equals(userEmail));
 
-        if (!isMember) {
-            throw new UnauthorizedException("User not authorized to access team projects");
+        if (!hasAccess) {
+            throw new UnauthorizedException("User not authorized to access tasks for this project");
         }
 
-        List<Project> projects = projectRepository.findByTeamId(teamId);
-        return projects.stream()
-                .map(this::convertToProjectResponse)
+        return project.getTasks().stream()
+                .map(this::convertToTaskResponse)
                 .collect(Collectors.toList());
     }
 
@@ -172,6 +149,39 @@ public class ProjectServiceImpl implements ProjectService {
                 .team(teamInfo)
                 .taskCount(project.getTasks().size())
                 .tasks(taskInfos)
+                .build();
+    }
+
+    private TaskResponse convertToTaskResponse(ProjectTask task) {
+        TaskResponse.ProjectInfo projectInfo = TaskResponse.ProjectInfo.builder()
+                .id(task.getProject().getId())
+                .name(task.getProject().getName())
+                .description(task.getProject().getDescription())
+                .status(task.getProject().getStatus())
+                .build();
+
+        List<TaskResponse.AssigneeInfo> assigneesInfo = task.getAssignees().stream()
+                .map(assignee -> TaskResponse.AssigneeInfo.builder()
+                        .id(assignee.getId())
+                        .name(assignee.getUser().getName())
+                        .email(assignee.getUser().getEmail())
+                        .teamRole(assignee.getRole().name())
+                        .profilePicture(assignee.getUser().getProfilePicture())
+                        .build())
+                .collect(Collectors.toList());
+
+        return TaskResponse.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .status(task.getStatus())
+                .startDate(task.getStartDate())
+                .endDate(task.getEndDate())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .project(projectInfo)
+                .assignees(assigneesInfo)
+                .observationCount(task.getObservations() != null ? task.getObservations().size() : 0)
                 .build();
     }
 }

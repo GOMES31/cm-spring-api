@@ -57,4 +57,13 @@ public class TaskResponse {
         @JsonProperty("profile_picture")
         private String profilePicture;
     }
+
+    @Data
+    @Builder
+    public static class ObservationInfo {
+        private Long id;
+        private String content;
+        @JsonProperty("created_at")
+        private Date createdAt;
+    }
 }

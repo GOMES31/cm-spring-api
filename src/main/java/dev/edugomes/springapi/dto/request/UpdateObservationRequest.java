@@ -8,6 +8,9 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class UpdateObservationRequest {
 
+    @NotNull(message = "Observation ID is required for update")
+    private Long id;
+
     @NotBlank(message = "Message is required")
     private String message;
 

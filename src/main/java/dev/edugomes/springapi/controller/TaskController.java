@@ -4,17 +4,18 @@ import dev.edugomes.springapi.common.ApiResponse;
 import dev.edugomes.springapi.dto.request.CreateTaskRequest;
 import dev.edugomes.springapi.dto.request.UpdateTaskRequest;
 import dev.edugomes.springapi.dto.response.TaskResponse;
+import dev.edugomes.springapi.dto.response.TaskResponse.ObservationInfo;
 import dev.edugomes.springapi.exception.TaskNotFoundException;
 import dev.edugomes.springapi.exception.ProjectNotFoundException;
 import dev.edugomes.springapi.exception.UnauthorizedException;
 import dev.edugomes.springapi.service.task.TaskService;
 import dev.edugomes.springapi.util.ResponseHandler;
+import dev.edugomes.springapi.util.GlobalMethods;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,125 +27,90 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    private static final String CREATE_TASK = "";
-    private static final String GET_ALL_TASKS = "";
-    private static final String GET_TASK_BY_ID = "/{id}";
-    private static final String UPDATE_TASK = "/{id}";
-    private static final String DELETE_TASK = "/{id}";
-    private static final String GET_TASKS_BY_PROJECT = "/project/{projectId}";
-    private static final String GET_TASKS_BY_USER = "/user";
+    private static final String CREATE_TASK_ENDPOINT = "/create";
+    private static final String UPDATE_TASK_ENDPOINT = "/update";
+    private static final String GET_TASK_BY_ID_ENDPOINT = "/{id}";
+    private static final String GET_TASK_OBSERVATIONS_ENDPOINT = "/{id}/observations";
 
     @PostMapping(
-            value = CREATE_TASK,
+            value = CREATE_TASK_ENDPOINT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<ApiResponse<TaskResponse>> createTask(
-            @Valid @RequestBody CreateTaskRequest createTaskRequest,
-            Authentication authentication) {
+            @Valid @RequestBody CreateTaskRequest createTaskRequest) {
         try {
-            TaskResponse taskResponse = taskService.createTask(createTaskRequest, authentication.getName());
+            String userEmail = GlobalMethods.getCurrentUserEmail();
+            TaskResponse taskResponse =
+                    taskService.createTask(createTaskRequest, userEmail);
             return ResponseHandler.buildResponse("Task created successfully", HttpStatus.CREATED, taskResponse);
         } catch (ProjectNotFoundException e) {
             return ResponseHandler.buildResponse("Project not found", HttpStatus.NOT_FOUND, null);
         } catch (UnauthorizedException e) {
             return ResponseHandler.buildResponse("Unauthorized to create task", HttpStatus.FORBIDDEN, null);
-        }
-    }
-
-    @GetMapping(
-            value = GET_ALL_TASKS,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<ApiResponse<List<TaskResponse>>> getAllTasks(Authentication authentication) {
-        try {
-            List<TaskResponse> tasks = taskService.getAllTasksForUser(authentication.getName());
-            return ResponseHandler.buildResponse("Tasks retrieved successfully", HttpStatus.OK, tasks);
         } catch (Exception e) {
-            return ResponseHandler.buildResponse("Error retrieving tasks", HttpStatus.INTERNAL_SERVER_ERROR, null);
-        }
-    }
-
-    @GetMapping(
-            value = GET_TASK_BY_ID,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<ApiResponse<TaskResponse>> getTaskById(
-            @PathVariable Long id,
-            Authentication authentication) {
-        try {
-            TaskResponse taskResponse = taskService.getTaskById(id, authentication.getName());
-            return ResponseHandler.buildResponse("Task retrieved successfully", HttpStatus.OK, taskResponse);
-        } catch (TaskNotFoundException e) {
-            return ResponseHandler.buildResponse("Task not found", HttpStatus.NOT_FOUND, null);
-        } catch (UnauthorizedException e) {
-            return ResponseHandler.buildResponse("Unauthorized to access task", HttpStatus.FORBIDDEN, null);
+            return ResponseHandler.buildResponse("Error creating task: " + e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
     @PutMapping(
-            value = UPDATE_TASK,
+            value = UPDATE_TASK_ENDPOINT,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<ApiResponse<TaskResponse>> updateTask(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateTaskRequest updateTaskRequest,
-            Authentication authentication) {
+            @Valid @RequestBody UpdateTaskRequest updateTaskRequest) {
         try {
-            TaskResponse taskResponse = taskService.updateTask(id, updateTaskRequest, authentication.getName());
+            if (updateTaskRequest.getId() == null) {
+                return ResponseHandler.buildResponse("Task ID is required for update", HttpStatus.BAD_REQUEST, null);
+            }
+            String userEmail = GlobalMethods.getCurrentUserEmail();
+            TaskResponse taskResponse = taskService.updateTask(updateTaskRequest.getId(), updateTaskRequest, userEmail);
             return ResponseHandler.buildResponse("Task updated successfully", HttpStatus.OK, taskResponse);
         } catch (TaskNotFoundException e) {
             return ResponseHandler.buildResponse("Task not found", HttpStatus.NOT_FOUND, null);
         } catch (UnauthorizedException e) {
             return ResponseHandler.buildResponse("Unauthorized to update task", HttpStatus.FORBIDDEN, null);
+        } catch (Exception e) {
+            return ResponseHandler.buildResponse("Error updating task: " + e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
-    @DeleteMapping(
-            value = DELETE_TASK,
+    @GetMapping(
+            value = GET_TASK_BY_ID_ENDPOINT,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<ApiResponse<Void>> deleteTask(
-            @PathVariable Long id,
-            Authentication authentication) {
+    public ResponseEntity<ApiResponse<TaskResponse>> getTaskById(
+            @PathVariable Long id) {
         try {
-            taskService.deleteTask(id, authentication.getName());
-            return ResponseHandler.buildResponse("Task deleted successfully", HttpStatus.OK, null);
+            String userEmail = GlobalMethods.getCurrentUserEmail();
+            TaskResponse taskResponse = taskService.getTaskById(id, userEmail);
+            return ResponseHandler.buildResponse("Task retrieved successfully", HttpStatus.OK, taskResponse);
         } catch (TaskNotFoundException e) {
             return ResponseHandler.buildResponse("Task not found", HttpStatus.NOT_FOUND, null);
         } catch (UnauthorizedException e) {
-            return ResponseHandler.buildResponse("Unauthorized to delete task", HttpStatus.FORBIDDEN, null);
-        }
-    }
-
-    @GetMapping(
-            value = GET_TASKS_BY_PROJECT,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<ApiResponse<List<TaskResponse>>> getTasksByProject(
-            @PathVariable Long projectId,
-            Authentication authentication) {
-        try {
-            List<TaskResponse> tasks = taskService.getTasksByProject(projectId, authentication.getName());
-            return ResponseHandler.buildResponse("Tasks retrieved successfully", HttpStatus.OK, tasks);
-        } catch (ProjectNotFoundException e) {
-            return ResponseHandler.buildResponse("Project not found", HttpStatus.NOT_FOUND, null);
-        } catch (UnauthorizedException e) {
-            return ResponseHandler.buildResponse("Unauthorized to access project tasks", HttpStatus.FORBIDDEN, null);
-        }
-    }
-
-    @GetMapping(
-            value = GET_TASKS_BY_USER,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<ApiResponse<List<TaskResponse>>> getTasksByUser(Authentication authentication) {
-        try {
-            List<TaskResponse> tasks = taskService.getTasksAssignedToUser(authentication.getName());
-            return ResponseHandler.buildResponse("User tasks retrieved successfully", HttpStatus.OK, tasks);
+            return ResponseHandler.buildResponse("Unauthorized to access task", HttpStatus.FORBIDDEN, null);
         } catch (Exception e) {
-            return ResponseHandler.buildResponse("Error retrieving user tasks", HttpStatus.INTERNAL_SERVER_ERROR, null);
+            return ResponseHandler.buildResponse("Error retrieving task: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
+        }
+    }
+
+    @GetMapping(
+            value = GET_TASK_OBSERVATIONS_ENDPOINT,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ApiResponse<List<ObservationInfo>>> getObservationsForTask(
+            @PathVariable Long id) {
+        try {
+            String userEmail = GlobalMethods.getCurrentUserEmail();
+            List<ObservationInfo> observations = taskService.getObservationsForTask(id, userEmail);
+            return ResponseHandler.buildResponse("Observations retrieved successfully", HttpStatus.OK, observations);
+        } catch (TaskNotFoundException e) {
+            return ResponseHandler.buildResponse("Task not found", HttpStatus.NOT_FOUND, null);
+        } catch (UnauthorizedException e) {
+            return ResponseHandler.buildResponse("Unauthorized to access observations for this task", HttpStatus.FORBIDDEN, null);
+        } catch (Exception e) {
+            return ResponseHandler.buildResponse("Error retrieving observations for task: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
         }
     }
 }

@@ -4,21 +4,11 @@ import dev.edugomes.springapi.dto.request.CreateObservationRequest;
 import dev.edugomes.springapi.dto.request.UpdateObservationRequest;
 import dev.edugomes.springapi.dto.response.ObservationResponse;
 
-import java.util.List;
-
 public interface ObservationService {
 
-    ObservationResponse createObservation(CreateObservationRequest createObservationRequest);
+    ObservationResponse createObservation(CreateObservationRequest createObservationRequest, String userEmail);
 
-    ObservationResponse getObservationById(Long id);
+    ObservationResponse updateObservation(Long id, UpdateObservationRequest updateObservationRequest, String userEmail);
 
-    List<ObservationResponse> getAllObservations();
-
-    List<ObservationResponse> getObservationsByTaskId(Long taskId);
-
-    List<ObservationResponse> getObservationsByUserId(Long userId);
-
-    ObservationResponse updateObservation(Long id, UpdateObservationRequest updateObservationRequest);
-
-    void deleteObservation(Long id);
+    ObservationResponse getObservationById(Long id, String userEmail);
 }

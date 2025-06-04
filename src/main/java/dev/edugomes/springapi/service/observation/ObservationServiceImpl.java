@@ -15,8 +15,6 @@ import dev.edugomes.springapi.repository.ProjectRepository;
 import dev.edugomes.springapi.repository.TaskRepository;
 import dev.edugomes.springapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,23 +23,17 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ObservationServiceImpl implements ObservationService {
 
     private final ObservationRepository observationRepository;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
-    private final ProjectRepository projectRepository;
 
-    private User getCurrentAuthenticatedUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UnauthorizedException("User not authenticated"));
+
+    private User getUserByEmail(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UnauthorizedException("User not authenticated or found: " + userEmail));
     }
 
     private ObservationResponse mapToObservationResponse(Observation observation) {
@@ -73,8 +65,8 @@ public class ObservationServiceImpl implements ObservationService {
 
     @Override
     @Transactional
-    public ObservationResponse createObservation(CreateObservationRequest createObservationRequest) {
-        User currentUser = getCurrentAuthenticatedUser();
+    public ObservationResponse createObservation(CreateObservationRequest createObservationRequest, String userEmail) {
+        User currentUser = getUserByEmail(userEmail);
 
         ProjectTask task = taskRepository.findById(createObservationRequest.getTaskId())
                 .orElseThrow(() -> new TaskNotFoundException("Task not found with ID: " + createObservationRequest.getTaskId()));
@@ -105,40 +97,26 @@ public class ObservationServiceImpl implements ObservationService {
     }
 
     @Override
-    public ObservationResponse getObservationById(Long id) {
+    public ObservationResponse getObservationById(Long id, String userEmail) {
+        User currentUser = getUserByEmail(userEmail);
+
         Observation observation = observationRepository.findById(id)
                 .orElseThrow(() -> new ObservationNotFoundException("Observation not found with ID: " + id));
+
+        boolean hasAccess = observation.getTask().getProject().getTeam().getMembers().stream()
+                .anyMatch(teamMember -> teamMember.getUser().getId().equals(currentUser.getId()));
+
+        if (!hasAccess) {
+            throw new UnauthorizedException("User is not authorized to view this observation.");
+        }
+
         return mapToObservationResponse(observation);
     }
 
     @Override
-    public List<ObservationResponse> getAllObservations() {
-        return observationRepository.findAll().stream()
-                .map(this::mapToObservationResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ObservationResponse> getObservationsByTaskId(Long taskId) {
-        if (!taskRepository.existsById(taskId)) {
-            throw new TaskNotFoundException("Task not found with ID: " + taskId);
-        }
-        return observationRepository.findByTaskIdOrderByCreatedAtDesc(taskId).stream()
-                .map(this::mapToObservationResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ObservationResponse> getObservationsByUserId(Long userId) {
-        return observationRepository.findByUserId(userId).stream()
-                .map(this::mapToObservationResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
-    public ObservationResponse updateObservation(Long id, UpdateObservationRequest updateObservationRequest) {
-        User currentUser = getCurrentAuthenticatedUser();
+    public ObservationResponse updateObservation(Long id, UpdateObservationRequest updateObservationRequest, String userEmail) {
+        User currentUser = getUserByEmail(userEmail);
 
         Observation observation = observationRepository.findById(id)
                 .orElseThrow(() -> new ObservationNotFoundException("Observation not found with ID: " + id));
@@ -149,32 +127,19 @@ public class ObservationServiceImpl implements ObservationService {
 
         observation.setMessage(updateObservationRequest.getMessage());
 
-        if (updateObservationRequest.getImageUrl() != null && !updateObservationRequest.getImageUrl().isEmpty()) {
-            if (observation.getImage() == null) {
-                observation.setImage(ObservationImage.builder().imageUrl(updateObservationRequest.getImageUrl()).build());
+        if (updateObservationRequest.getImageUrl() != null) {
+            if (updateObservationRequest.getImageUrl().isEmpty()) {
+                observation.setImage(null);
             } else {
-                observation.getImage().setImageUrl(updateObservationRequest.getImageUrl());
+                if (observation.getImage() == null) {
+                    observation.setImage(ObservationImage.builder().imageUrl(updateObservationRequest.getImageUrl()).build());
+                } else {
+                    observation.getImage().setImageUrl(updateObservationRequest.getImageUrl());
+                }
             }
-        } else if (updateObservationRequest.getImageUrl() != null && updateObservationRequest.getImageUrl().isEmpty()) {
-            observation.setImage(null);
         }
 
         Observation updatedObservation = observationRepository.save(observation);
         return mapToObservationResponse(updatedObservation);
-    }
-
-    @Override
-    @Transactional
-    public void deleteObservation(Long id) {
-        User currentUser = getCurrentAuthenticatedUser();
-
-        Observation observation = observationRepository.findById(id)
-                .orElseThrow(() -> new ObservationNotFoundException("Observation not found with ID: " + id));
-
-        if (!observation.getUser().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedException("You are not authorized to delete this observation.");
-        }
-
-        observationRepository.delete(observation);
     }
 }
