@@ -39,7 +39,7 @@ public class ProjectResponse {
     public static class TeamInfo {
         private Long id;
         private String name;
-        private String description;
+        private String department;
     }
 
     @Data

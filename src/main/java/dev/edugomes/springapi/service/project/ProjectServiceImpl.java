@@ -136,7 +136,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectResponse.TeamInfo teamInfo = ProjectResponse.TeamInfo.builder()
                 .id(project.getTeam().getId())
                 .name(project.getTeam().getName())
-                .description(project.getTeam().getDescription())
+                .department(project.getTeam().getDepartment())
                 .build();
 
         return ProjectResponse.builder()
@@ -166,7 +166,7 @@ public class ProjectServiceImpl implements ProjectService {
                         .name(assignee.getUser().getName())
                         .email(assignee.getUser().getEmail())
                         .teamRole(assignee.getRole().name())
-                        .profilePicture(assignee.getUser().getProfilePicture())
+                        .avatarUrl(assignee.getUser().getAvatarUrl())
                         .build())
                 .collect(Collectors.toList());
 

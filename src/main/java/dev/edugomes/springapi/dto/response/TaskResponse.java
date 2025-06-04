@@ -54,8 +54,8 @@ public class TaskResponse {
         @JsonProperty("team_role")
         private String teamRole;
 
-        @JsonProperty("profile_picture")
-        private String profilePicture;
+        @JsonProperty("avatar_url")
+        private String avatarUrl;
     }
 
     @Data

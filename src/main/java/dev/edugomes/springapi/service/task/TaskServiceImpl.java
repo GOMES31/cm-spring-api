@@ -154,7 +154,7 @@ public class TaskServiceImpl implements TaskService {
         return task.getObservations().stream()
                 .map(observation -> ObservationInfo.builder()
                         .id(observation.getId())
-                        .content(observation.getContent())
+                        .content(observation.getMessage())
                         .createdAt(observation.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
@@ -176,7 +176,7 @@ public class TaskServiceImpl implements TaskService {
                                 .name(assignee.getUser().getName())
                                 .email(assignee.getUser().getEmail())
                                 .teamRole(assignee.getRole().name())
-                                .profilePicture(assignee.getUser().getProfilePicture())
+                                .avatarUrl(assignee.getUser().getAvatarUrl())
                                 .build())
                         .collect(Collectors.toList());
 

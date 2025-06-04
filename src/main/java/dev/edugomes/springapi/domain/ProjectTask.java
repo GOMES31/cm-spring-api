@@ -31,7 +31,6 @@ public class ProjectTask {
     @Column(nullable = false)
     private Status status;
 
-    @CreationTimestamp
     @Column(name = "start_date", updatable = false)
     private Date startDate;
 
@@ -66,12 +65,4 @@ public class ProjectTask {
     )
     @Builder.Default
     private List<Observation> observations = new ArrayList<>();
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private Date createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Date updatedAt;
 }
