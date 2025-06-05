@@ -2,7 +2,6 @@ package dev.edugomes.springapi.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.edugomes.springapi.domain.Status;
-import dev.edugomes.springapi.domain.ProjectTask;
 import lombok.Builder;
 import lombok.Data;
 
@@ -29,8 +28,11 @@ public class ProjectResponse {
 
     private TeamInfo team;
 
-    @JsonProperty("task_count")
-    private Integer taskCount;
+    @JsonProperty("created_at")
+    private Date createdAt;
+
+    @JsonProperty("updated_at")
+    private Date updatedAt;
 
     private List<TaskInfo> tasks;
 
@@ -55,8 +57,5 @@ public class ProjectResponse {
 
         @JsonProperty("end_date")
         private Date endDate;
-
-        @JsonProperty("assignee_count")
-        private Integer assigneeCount;
     }
 }

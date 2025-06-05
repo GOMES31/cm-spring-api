@@ -9,6 +9,7 @@ import dev.edugomes.springapi.exception.ProjectNotFoundException;
 import dev.edugomes.springapi.exception.TaskNotFoundException;
 import dev.edugomes.springapi.exception.TeamMemberNotFoundException;
 import dev.edugomes.springapi.exception.UnauthorizedException;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.ProjectRepository;
 import dev.edugomes.springapi.repository.TaskRepository;
 import dev.edugomes.springapi.repository.TeamMemberRepository;
@@ -42,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
             throw new UnauthorizedException("User does not have access to this project");
         }
 
-        ProjectTask task = ProjectTask.builder()
+        Task task = Task.builder()
                 .title(createTaskRequest.getTitle())
                 .description(createTaskRequest.getDescription())
                 .status(createTaskRequest.getStatus() != null ?
@@ -71,13 +72,13 @@ public class TaskServiceImpl implements TaskService {
             task.setAssignees(assignees);
         }
 
-        ProjectTask savedTask = taskRepository.save(task);
-        return mapToTaskResponse(savedTask);
+        Task savedTask = taskRepository.save(task);
+        return CustomMapper.toTaskResponse(savedTask);
     }
 
     @Override
     public TaskResponse getTaskById(Long id, String userEmail) {
-        ProjectTask task = taskRepository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         boolean hasAccess =
@@ -88,12 +89,12 @@ public class TaskServiceImpl implements TaskService {
             throw new UnauthorizedException("User does not have access to this task");
         }
 
-        return mapToTaskResponse(task);
+        return CustomMapper.toTaskResponse(task);
     }
 
     @Override
     public TaskResponse updateTask(Long id, UpdateTaskRequest updateTaskRequest, String userEmail) {
-        ProjectTask task = taskRepository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         boolean hasAccess =
@@ -134,13 +135,13 @@ public class TaskServiceImpl implements TaskService {
             task.setAssignees(newAssignees);
         }
 
-        ProjectTask updatedTask = taskRepository.save(task);
-        return mapToTaskResponse(updatedTask);
+        Task updatedTask = taskRepository.save(task);
+        return CustomMapper.toTaskResponse(updatedTask);
     }
 
     @Override
     public List<ObservationInfo> getObservationsForTask(Long taskId, String userEmail) {
-        ProjectTask task = taskRepository.findById(taskId)
+        Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         boolean hasAccess =
@@ -152,47 +153,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         return task.getObservations().stream()
-                .map(observation -> ObservationInfo.builder()
-                        .id(observation.getId())
-                        .content(observation.getMessage())
-                        .createdAt(observation.getCreatedAt())
-                        .build())
+                .map(CustomMapper::toObservationInfo)
                 .collect(Collectors.toList());
-    }
-
-    private TaskResponse mapToTaskResponse(ProjectTask task) {
-        TaskResponse.ProjectInfo projectInfo =
-                TaskResponse.ProjectInfo.builder()
-                        .id(task.getProject().getId())
-                        .name(task.getProject().getName())
-                        .description(task.getProject().getDescription())
-                        .status(task.getProject().getStatus())
-                        .build();
-
-        List<TaskResponse.AssigneeInfo> assigneesInfo =
-                task.getAssignees().stream()
-                        .map(assignee -> TaskResponse.AssigneeInfo.builder()
-                                .id(assignee.getId())
-                                .name(assignee.getUser().getName())
-                                .email(assignee.getUser().getEmail())
-                                .teamRole(assignee.getRole().name())
-                                .avatarUrl(assignee.getUser().getAvatarUrl())
-                                .build())
-                        .collect(Collectors.toList());
-
-        return TaskResponse.builder()
-                .id(task.getId())
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .status(task.getStatus())
-                .startDate(task.getStartDate())
-                .endDate(task.getEndDate())
-                .createdAt(task.getCreatedAt())
-                .updatedAt(task.getUpdatedAt())
-                .project(projectInfo)
-                .assignees(assigneesInfo)
-                .observationCount(task.getObservations() != null ?
-                        task.getObservations().size() : 0)
-                .build();
     }
 }
