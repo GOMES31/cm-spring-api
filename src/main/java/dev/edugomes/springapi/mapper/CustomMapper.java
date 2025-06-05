@@ -114,7 +114,6 @@ public class CustomMapper {
                                 .avatarUrl(assignee.getUser().getAvatarUrl())
                                 .build())
                         .collect(Collectors.toList()))
-                .observationCount(task.getObservations().size())
                 .build();
     }
 
