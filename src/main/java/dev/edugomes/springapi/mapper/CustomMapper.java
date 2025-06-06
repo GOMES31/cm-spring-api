@@ -4,6 +4,7 @@ import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.domain.TeamMember;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.response.AuthResponse;
+import dev.edugomes.springapi.dto.response.RefreshResponse;
 import dev.edugomes.springapi.dto.response.TeamMemberResponse;
 import dev.edugomes.springapi.dto.response.TeamResponse;
 import dev.edugomes.springapi.dto.response.UserProfileResponse;
@@ -43,12 +44,19 @@ public class CustomMapper {
                 .build();
     }
 
-    public AuthResponse toAuthResponse(User user, String access, String refreshToken) {
+    public AuthResponse toAuthResponse(User user, String accessToken, String refreshToken) {
         return AuthResponse.builder()
                 .name(user.getName())
                 .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
-                .accessToken(access)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public RefreshResponse toRefreshResponse(String accessToken, String refreshToken) {
+        return RefreshResponse.builder()
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
