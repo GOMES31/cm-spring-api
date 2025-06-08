@@ -7,6 +7,7 @@ import dev.edugomes.springapi.dto.response.ProjectResponse;
 import dev.edugomes.springapi.dto.response.TaskResponse;
 import dev.edugomes.springapi.exception.ProjectNotFoundException;
 import dev.edugomes.springapi.exception.UnauthorizedException;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.ProjectRepository;
 import dev.edugomes.springapi.repository.TeamRepository;
 import dev.edugomes.springapi.repository.UserRepository;
@@ -52,7 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .build();
 
         Project savedProject = projectRepository.save(project);
-        return convertToProjectResponse(savedProject);
+        return CustomMapper.toProjectResponse(savedProject);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new UnauthorizedException("User not authorized to access this project");
         }
 
-        return convertToProjectResponse(project);
+        return CustomMapper.toProjectResponse(project);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         Project updatedProject = projectRepository.save(project);
-        return convertToProjectResponse(updatedProject);
+        return CustomMapper.toProjectResponse(updatedProject);
     }
 
     @Override
@@ -116,72 +117,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         return project.getTasks().stream()
-                .map(this::convertToTaskResponse)
+                .map(CustomMapper::toTaskResponse)
                 .collect(Collectors.toList());
-    }
-
-    private ProjectResponse convertToProjectResponse(Project project) {
-        List<ProjectResponse.TaskInfo> taskInfos = project.getTasks().stream()
-                .map(task -> ProjectResponse.TaskInfo.builder()
-                        .id(task.getId())
-                        .title(task.getTitle())
-                        .description(task.getDescription())
-                        .status(task.getStatus())
-                        .startDate(task.getStartDate())
-                        .endDate(task.getEndDate())
-                        .assigneeCount(task.getAssignees().size())
-                        .build())
-                .collect(Collectors.toList());
-
-        ProjectResponse.TeamInfo teamInfo = ProjectResponse.TeamInfo.builder()
-                .id(project.getTeam().getId())
-                .name(project.getTeam().getName())
-                .department(project.getTeam().getDepartment())
-                .build();
-
-        return ProjectResponse.builder()
-                .id(project.getId())
-                .name(project.getName())
-                .description(project.getDescription())
-                .startDate(project.getStartDate())
-                .endDate(project.getEndDate())
-                .status(project.getStatus())
-                .team(teamInfo)
-                .taskCount(project.getTasks().size())
-                .tasks(taskInfos)
-                .build();
-    }
-
-    private TaskResponse convertToTaskResponse(ProjectTask task) {
-        TaskResponse.ProjectInfo projectInfo = TaskResponse.ProjectInfo.builder()
-                .id(task.getProject().getId())
-                .name(task.getProject().getName())
-                .description(task.getProject().getDescription())
-                .status(task.getProject().getStatus())
-                .build();
-
-        List<TaskResponse.AssigneeInfo> assigneesInfo = task.getAssignees().stream()
-                .map(assignee -> TaskResponse.AssigneeInfo.builder()
-                        .id(assignee.getId())
-                        .name(assignee.getUser().getName())
-                        .email(assignee.getUser().getEmail())
-                        .teamRole(assignee.getRole().name())
-                        .avatarUrl(assignee.getUser().getAvatarUrl())
-                        .build())
-                .collect(Collectors.toList());
-
-        return TaskResponse.builder()
-                .id(task.getId())
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .status(task.getStatus())
-                .startDate(task.getStartDate())
-                .endDate(task.getEndDate())
-                .createdAt(task.getCreatedAt())
-                .updatedAt(task.getUpdatedAt())
-                .project(projectInfo)
-                .assignees(assigneesInfo)
-                .observationCount(task.getObservations() != null ? task.getObservations().size() : 0)
-                .build();
     }
 }

@@ -55,5 +55,5 @@ public class Project {
             orphanRemoval = true
     )
     @Builder.Default
-    private List<ProjectTask> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 }

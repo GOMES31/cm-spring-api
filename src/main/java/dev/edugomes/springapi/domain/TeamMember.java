@@ -38,7 +38,7 @@ public class TeamMember {
 
     @ManyToMany(mappedBy = "assignees")
     @Builder.Default
-    private List<ProjectTask> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
 
 }

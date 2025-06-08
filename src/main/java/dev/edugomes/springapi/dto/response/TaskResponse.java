@@ -30,10 +30,7 @@ public class TaskResponse {
     private Date updatedAt;
 
     private ProjectInfo project;
-    private List<AssigneeInfo> assignees;
-
-    @JsonProperty("observation_count")
-    private Integer observationCount;
+    private List<TeamMemberInfo> assignees;
 
     @Data
     @Builder
@@ -46,7 +43,7 @@ public class TaskResponse {
 
     @Data
     @Builder
-    public static class AssigneeInfo {
+    public static class TeamMemberInfo {
         private Long id;
         private String name;
         private String email;
@@ -62,7 +59,7 @@ public class TaskResponse {
     @Builder
     public static class ObservationInfo {
         private Long id;
-        private String content;
+        private String message;
         @JsonProperty("created_at")
         private Date createdAt;
     }
