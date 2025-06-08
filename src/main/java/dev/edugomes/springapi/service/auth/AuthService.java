@@ -1,18 +1,25 @@
 package dev.edugomes.springapi.service.auth;
 
-import dev.edugomes.springapi.dto.request.LoginRequest;
-import dev.edugomes.springapi.dto.request.RegisterRequest;
+import dev.edugomes.springapi.domain.User;
+import dev.edugomes.springapi.dto.request.SignInRequest;
+import dev.edugomes.springapi.dto.request.SignUpRequest;
 import dev.edugomes.springapi.dto.response.AuthResponse;
+import dev.edugomes.springapi.dto.response.RefreshResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 
 public interface AuthService {
 
-    AuthResponse registerUser(RegisterRequest registerRequest);
+    void revokeAllUserTokens(User user);
 
-    AuthResponse authenticateUser(LoginRequest loginRequest);
+    void saveRefreshToken(User user, String refreshToken);
 
-    void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    AuthResponse registerUser(SignUpRequest signUpRequest);
+
+    AuthResponse authenticateUser(SignInRequest signInRequest);
+
+    RefreshResponse refreshToken(HttpServletRequest request) throws IOException;
+
 }

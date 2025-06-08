@@ -37,7 +37,8 @@ public class TeamMember {
     private Date joinedAt;
 
     @ManyToMany(mappedBy = "assignees")
-    private List<ProjectTask> tasks = new ArrayList<>();
+    @Builder.Default
+    private List<Task> tasks = new ArrayList<>();
 
 
 }

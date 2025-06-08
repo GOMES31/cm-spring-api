@@ -1,19 +1,20 @@
 package dev.edugomes.springapi.service.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.edugomes.springapi.domain.Token;
 import dev.edugomes.springapi.domain.TokenType;
-import dev.edugomes.springapi.dto.request.LoginRequest;
-import dev.edugomes.springapi.dto.request.RegisterRequest;
+import dev.edugomes.springapi.dto.request.SignInRequest;
+import dev.edugomes.springapi.dto.request.SignUpRequest;
 import dev.edugomes.springapi.exception.UserAlreadyExistsException;
 import dev.edugomes.springapi.jwt.JwtService;
 import dev.edugomes.springapi.domain.Role;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.response.AuthResponse;
+import dev.edugomes.springapi.dto.response.RefreshResponse;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.TokenRepository;
 import dev.edugomes.springapi.repository.UserRepository;
+import dev.edugomes.springapi.service.log.LogService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,13 +31,15 @@ import java.io.IOException;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LogService logService;
     private final AuthenticationManager authenticationManager;
-    private final TokenRepository tokenRepository;
 
 
-    private void revokeAllUserTokens(User user) {
+    @Override
+    public void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
 
         if(validUserTokens.isEmpty()) {
@@ -50,28 +53,31 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.saveAll(validUserTokens);
     }
-    private void saveUserToken(User user, String jwtToken) {
+
+    @Override
+    public void saveRefreshToken(User user, String refreshToken) {
         var token = Token.builder()
                 .user(user)
-                .token(jwtToken)
+                .token(refreshToken)
                 .type(TokenType.BEARER)
                 .revoked(false)
                 .expired(false)
                 .build();
+
         tokenRepository.save(token);
     }
 
     @Override
-    public AuthResponse registerUser(RegisterRequest registerRequest) {
+    public AuthResponse registerUser(SignUpRequest signUpRequest) {
 
-        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+        if(userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
 
         User user = User.builder()
-                .name(registerRequest.getName())
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .name(signUpRequest.getName())
+                .email(signUpRequest.getEmail())
+                .password(passwordEncoder.encode(signUpRequest.getPassword()))
                 .role(Role.USER)
                 .build();
 
@@ -79,103 +85,93 @@ public class AuthServiceImpl implements AuthService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        registerRequest.getEmail(),
-                        registerRequest.getPassword()
+                        signUpRequest.getEmail(),
+                        signUpRequest.getPassword()
                 )
         );
 
-        var jwtToken = jwtService.generateToken(user);
+        var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
-        saveUserToken(savedUser, jwtToken);
+        saveRefreshToken(savedUser, refreshToken);
 
-        return AuthResponse.builder()
-                .name(savedUser.getName())
-                .email(savedUser.getEmail())
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+        logService.saveLog("Sign Up", savedUser.getEmail());
+
+        return CustomMapper.toAuthResponse(user, accessToken, refreshToken);
     }
 
 
 
-    public AuthResponse authenticateUser(LoginRequest loginRequest) {
+    public AuthResponse authenticateUser(SignInRequest signInRequest) {
 
-        User user = userRepository.findByEmail(loginRequest.getEmail())
+        User user = userRepository.findByEmail(signInRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "User not found: " + loginRequest.getEmail()));
+                        "User not found: " + signInRequest.getEmail()));
 
-        // Check if the provided password matches the stored password
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        // Verify if the provided password matches the stored password
+        if (!passwordEncoder.matches(signInRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
+                        signInRequest.getEmail(),
+                        signInRequest.getPassword()
                 )
         );
 
-        var jwtToken = jwtService.generateToken(user);
+        var accessToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
         revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
+        saveRefreshToken(user, refreshToken);
 
-        return AuthResponse.builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+        logService.saveLog("Sign In", user.getEmail());
+
+        return CustomMapper.toAuthResponse(user, accessToken, refreshToken);
     }
 
     @Override
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
+    public RefreshResponse refreshToken(HttpServletRequest request) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new IllegalArgumentException("Invalid authorization header");
         }
 
         final String refreshToken = authHeader.substring(7);
         final String userEmail = jwtService.extractUsername(refreshToken);
 
         if (userEmail == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new IllegalArgumentException("Could not extract email from token");
         }
-
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
 
-        // If user and token is valid creates new authToken
-        if(jwtService.isTokenValid(refreshToken, user)){
-            String newAccessToken = jwtService.generateToken(user);
-            String newRefreshToken = jwtService.generateRefreshToken(user);
+        var storedToken = tokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Token not found in database"));
 
-            revokeAllUserTokens(user);
-            saveUserToken(user,newAccessToken);
-            saveUserToken(user,newRefreshToken);
-
-            var authResponse = AuthResponse.builder()
-                    .name(user.getName())
-                    .email(user.getEmail())
-                    .accessToken(newAccessToken)
-                    .refreshToken(newRefreshToken)
-                    .build();
-
-            new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-
-        } else{
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        if (storedToken.isExpired() || storedToken.isRevoked()) {
+            throw new RuntimeException("Token is expired or revoked");
         }
 
+        boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
+
+        if(!isTokenValid) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String newAccessToken = jwtService.generateToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+
+        revokeAllUserTokens(user);
+        saveRefreshToken(user, newRefreshToken);
+
+        // Verify if the new refresh token was saved correctly
+        tokenRepository.findByToken(newRefreshToken)
+                .orElseThrow(() -> new RuntimeException("New refresh token not found in database after saving"));
+
+        return CustomMapper.toRefreshResponse(newAccessToken, newRefreshToken);
     }
 }

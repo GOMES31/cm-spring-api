@@ -2,6 +2,9 @@ package dev.edugomes.springapi.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,10 +41,19 @@ public class Project {
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
 
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
     @OneToMany(
             mappedBy = "project",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<ProjectTask> tasks = new ArrayList<>();
+    @Builder.Default
+    private List<Task> tasks = new ArrayList<>();
 }

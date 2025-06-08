@@ -1,11 +1,11 @@
 package dev.edugomes.springapi.controller;
 
-import dev.edugomes.springapi.dto.request.LoginRequest;
-import dev.edugomes.springapi.dto.request.RegisterRequest;
+import dev.edugomes.springapi.dto.request.SignInRequest;
+import dev.edugomes.springapi.dto.request.SignUpRequest;
 import dev.edugomes.springapi.common.ApiResponse;
 import dev.edugomes.springapi.dto.response.AuthResponse;
+import dev.edugomes.springapi.dto.response.RefreshResponse;
 import dev.edugomes.springapi.exception.UserAlreadyExistsException;
-import dev.edugomes.springapi.jwt.JwtService;
 import dev.edugomes.springapi.service.auth.AuthService;
 import dev.edugomes.springapi.util.ResponseHandler;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,10 +31,9 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private static final String REGISTER_USER = "/register";
-    private static final String AUTHENTICATE_USER = "/login";
+    private static final String REGISTER_USER = "/signup";
+    private static final String AUTHENTICATE_USER = "/signin";
     private static final String REFRESH_TOKEN = "/refresh";
-    private final JwtService jwtService;
 
 
     @PostMapping(
@@ -42,9 +41,9 @@ public class AuthController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<ApiResponse<AuthResponse>> registerUser(@Valid @RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<ApiResponse<AuthResponse>> registerUser(@Valid @RequestBody SignUpRequest signUpRequest){
         try {
-            AuthResponse authResponse = authService.registerUser(registerRequest);
+            AuthResponse authResponse = authService.registerUser(signUpRequest);
             return ResponseHandler.buildResponse("User registered successfully", HttpStatus.CREATED, authResponse);
         } catch( UserAlreadyExistsException e){
             return ResponseHandler.buildResponse("User already exists",HttpStatus.CONFLICT, null);
@@ -56,9 +55,9 @@ public class AuthController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<ApiResponse<AuthResponse>> authenticateUser(@Valid @RequestBody LoginRequest loginRequest){
+    public ResponseEntity<ApiResponse<AuthResponse>> authenticateUser(@Valid @RequestBody SignInRequest signInRequest){
         try{
-            AuthResponse authResponse = authService.authenticateUser(loginRequest);
+            AuthResponse authResponse = authService.authenticateUser(signInRequest);
             return ResponseHandler.buildResponse("User authenticated successfully", HttpStatus.OK, authResponse);
         } catch( UsernameNotFoundException e){
             return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
@@ -70,16 +69,16 @@ public class AuthController {
 
     @PostMapping(
             value = REFRESH_TOKEN,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<ApiResponse<RefreshResponse>> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try{
-            authService.refreshToken(request,response);
+            RefreshResponse refreshResponse = authService.refreshToken(request);
+            return ResponseHandler.buildResponse("Token refreshed successfully", HttpStatus.OK, refreshResponse);
         } catch(UsernameNotFoundException e){
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        } catch ( Exception e){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
+        } catch (Exception e){
+            return ResponseHandler.buildResponse("Invalid refresh token", HttpStatus.UNAUTHORIZED, null);
         }
     }
 

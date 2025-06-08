@@ -4,14 +4,14 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/tasktrackr-api
+    url: jdbc:postgresql://localhost:5432/tasktrackr-api 
     username: tasktrackr_admin
     password: 1234
 
   jpa:
     hibernate:
       # Options: None, Validate, Update, Create, Create-Drop
-      ddl-auto: create
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -26,6 +26,10 @@ server:
 security:
   jwt:
     secret-key: ${JWT_SECRET}
-    expiration: 86400000       # 1 day
+    expiration: 86400000 # 1 day
     refresh-token:
-      expiration: 604800000    # 7 days
+      expiration: 604800000 # 7 days
+
+logging:
+  level:
+    dev.edugomes.springapi.service.auth: DEBUG
