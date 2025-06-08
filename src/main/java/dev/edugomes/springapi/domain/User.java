@@ -64,7 +64,6 @@ public class User implements UserDetails {
         memberships.remove(membership);
     }
 
-    // Default methods from UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

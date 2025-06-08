@@ -28,6 +28,7 @@ public class UserController {
     private static final String UPDATE_PROFILE = "/update-profile";
     private static final String GET_TEAMS = "/teams";
 
+
     @PutMapping(
             value = UPDATE_PROFILE,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -62,5 +63,4 @@ public class UserController {
             return ResponseHandler.buildResponse("Could not retrieve teams", HttpStatus.BAD_REQUEST, null);
         }
     }
-
 }

@@ -4,6 +4,7 @@ import dev.edugomes.springapi.dto.request.SignInRequest;
 import dev.edugomes.springapi.dto.request.SignUpRequest;
 import dev.edugomes.springapi.common.ApiResponse;
 import dev.edugomes.springapi.dto.response.AuthResponse;
+import dev.edugomes.springapi.dto.response.RefreshResponse;
 import dev.edugomes.springapi.exception.UserAlreadyExistsException;
 import dev.edugomes.springapi.service.auth.AuthService;
 import dev.edugomes.springapi.util.ResponseHandler;
@@ -68,16 +69,16 @@ public class AuthController {
 
     @PostMapping(
             value = REFRESH_TOKEN,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<ApiResponse<RefreshResponse>> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try{
-            authService.refreshToken(request,response);
+            RefreshResponse refreshResponse = authService.refreshToken(request);
+            return ResponseHandler.buildResponse("Token refreshed successfully", HttpStatus.OK, refreshResponse);
         } catch(UsernameNotFoundException e){
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        } catch ( Exception e){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
+        } catch (Exception e){
+            return ResponseHandler.buildResponse("Invalid refresh token", HttpStatus.UNAUTHORIZED, null);
         }
     }
 

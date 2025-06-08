@@ -6,6 +6,7 @@ import dev.edugomes.springapi.domain.TeamRole;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.AddTeamMemberRequest;
+import dev.edugomes.springapi.dto.request.UpdateTeamMemberRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamRequest;
 import dev.edugomes.springapi.dto.response.TeamResponse;
 import dev.edugomes.springapi.exception.UserNotFoundException;
@@ -96,20 +97,28 @@ public class TeamServiceImpl implements TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("Team not found"));
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        boolean isAlreadyMember = team.getMembers().stream()
+                .anyMatch(member -> member.getUser().getId().equals(user.getId()));
+
+        if (isAlreadyMember) {
+            throw new RuntimeException("User is already a member of this team");
+        }
 
         TeamMember teamMember = TeamMember.builder()
                 .user(user)
                 .team(team)
-                .role(TeamRole.valueOf(request.getRole().toUpperCase()))
+                .role(TeamRole.valueOf(request.getRole()))
                 .build();
 
-        teamMemberRepository.save(teamMember);
+        teamMember = teamMemberRepository.save(teamMember);
 
         team.addMember(teamMember);
         user.addMembership(teamMember);
 
+        userRepository.save(user);
         teamRepository.save(team);
 
         String email = getCurrentUserEmail();
@@ -166,4 +175,24 @@ public class TeamServiceImpl implements TeamService {
         String email = getCurrentUserEmail();
         logService.saveLog("Remove Team Member", email);
     }
+
+    @Override
+    public void updateMember(Long teamId, Long memberId, UpdateTeamMemberRequest request) {
+        TeamMember teamMember = teamMemberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Team member not found"));
+
+        if (!teamMember.getTeam().getId().equals(teamId)) {
+            throw new RuntimeException("Member does not belong to the specified team");
+        }
+
+        if (request.getRole() != null && !request.getRole().isEmpty()) {
+            teamMember.setRole(TeamRole.valueOf(request.getRole()));
+        }
+
+        teamMemberRepository.save(teamMember);
+
+        String email = getCurrentUserEmail();
+        logService.saveLog("Update Team Member Role", email);
+    }
+
 }

@@ -31,11 +31,8 @@ public class ProjectTask {
     @Column(nullable = false)
     private Status status;
 
-
-    @CreationTimestamp
     @Column(name = "start_date", updatable = false)
     private Date startDate;
-
 
     @Column(name = "end_date")
     private Date endDate;
