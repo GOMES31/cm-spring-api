@@ -26,11 +26,10 @@ server:
 security:
   jwt:
     secret-key: ${JWT_SECRET}
-    expiration: 60000 # 1min # 86400000 # 1 day
+    expiration: 86400000 # 1 day
     refresh-token:
-      expiration: 300000 # 5 min # 604800000 # 7 days
-
-    level:
-      dev.edugomes.springapi.service.auth: DEBUG
+      expiration: 604800000 # 7 days
 
 logging:
+  level:
+    dev.edugomes.springapi.service.auth: DEBUG
