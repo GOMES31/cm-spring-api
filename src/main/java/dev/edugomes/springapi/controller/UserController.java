@@ -4,6 +4,9 @@ import dev.edugomes.springapi.common.ApiResponse;
 import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.dto.request.UpdateUserProfileRequest;
 import dev.edugomes.springapi.dto.response.TeamResponse;
+import dev.edugomes.springapi.dto.response.TaskResponse;
+import dev.edugomes.springapi.dto.response.ProjectResponse;
+import dev.edugomes.springapi.dto.response.ObservationResponse;
 import dev.edugomes.springapi.dto.response.UserProfileResponse;
 import dev.edugomes.springapi.exception.UserNotFoundException;
 import dev.edugomes.springapi.mapper.CustomMapper;
@@ -27,6 +30,9 @@ public class UserController {
 
     private static final String UPDATE_PROFILE = "/update-profile";
     private static final String GET_TEAMS = "/teams";
+    private static final String GET_TASKS = "/tasks";
+    private static final String GET_PROJECTS = "/projects";
+    private static final String GET_OBSERVATIONS = "/observations";
 
 
     @PutMapping(
@@ -61,6 +67,60 @@ public class UserController {
             return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
         } catch (Exception e) {
             return ResponseHandler.buildResponse("Could not retrieve teams", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @GetMapping(
+            value = GET_TASKS,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ApiResponse<List<TaskResponse>>> getTasks(){
+        try {
+            List<TaskResponse> tasks = userService.getTasksForAuthenticatedUser();
+            if(tasks.isEmpty()) {
+                return ResponseHandler.buildResponse("No tasks found for the user", HttpStatus.OK, null);
+            }
+            return ResponseHandler.buildResponse("Tasks retrieved successfully", HttpStatus.OK, tasks);
+        } catch (UserNotFoundException e) {
+            return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
+        } catch (Exception e) {
+            return ResponseHandler.buildResponse("Could not retrieve tasks", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @GetMapping(
+            value = GET_PROJECTS,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getProjects(){
+        try {
+            List<ProjectResponse> projects = userService.getProjectsForAuthenticatedUser();
+            if(projects.isEmpty()) {
+                return ResponseHandler.buildResponse("No projects found for the user", HttpStatus.OK, null);
+            }
+            return ResponseHandler.buildResponse("Projects retrieved successfully", HttpStatus.OK, projects);
+        } catch (UserNotFoundException e) {
+            return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
+        } catch (Exception e) {
+            return ResponseHandler.buildResponse("Could not retrieve projects", HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @GetMapping(
+            value = GET_OBSERVATIONS,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ApiResponse<List<ObservationResponse>>> getObservations(){
+        try {
+            List<ObservationResponse> observations = userService.getObservationsForAuthenticatedUser();
+            if(observations.isEmpty()) {
+                return ResponseHandler.buildResponse("No observations found for the user", HttpStatus.OK, null);
+            }
+            return ResponseHandler.buildResponse("Observations retrieved successfully", HttpStatus.OK, observations);
+        } catch (UserNotFoundException e) {
+            return ResponseHandler.buildResponse("User not found", HttpStatus.NOT_FOUND, null);
+        } catch (Exception e) {
+            return ResponseHandler.buildResponse("Could not retrieve observations", HttpStatus.BAD_REQUEST, null);
         }
     }
 }
