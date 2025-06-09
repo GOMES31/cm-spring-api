@@ -48,6 +48,7 @@ public class TaskServiceImpl implements TaskService {
                 .description(createTaskRequest.getDescription())
                 .status(createTaskRequest.getStatus() != null ?
                         createTaskRequest.getStatus() : Status.PENDING)
+                .startDate(createTaskRequest.getStartDate())
                 .endDate(createTaskRequest.getEndDate())
                 .project(project)
                 .assignees(new ArrayList<>())
@@ -114,6 +115,9 @@ public class TaskServiceImpl implements TaskService {
         if (updateTaskRequest.getStatus() != null) {
             task.setStatus(updateTaskRequest.getStatus());
         }
+        if (updateTaskRequest.getStartDate() != null) { // <-- Add this block
+            task.setStartDate(updateTaskRequest.getStartDate());
+        }
         if (updateTaskRequest.getEndDate() != null) {
             task.setEndDate(updateTaskRequest.getEndDate());
         }
@@ -125,8 +129,7 @@ public class TaskServiceImpl implements TaskService {
                         teamMemberRepository.findById(assigneeId)
                                 .orElseThrow(() -> new TeamMemberNotFoundException("Team member not found"));
 
-                if
-                (!teamMember.getTeam().getId().equals(task.getProject().getTeam().getId())) {
+                if (!teamMember.getTeam().getId().equals(task.getProject().getTeam().getId())) {
                     throw new UnauthorizedException("Team member does not belong to the project's team");
                 }
 
@@ -138,6 +141,7 @@ public class TaskServiceImpl implements TaskService {
         Task updatedTask = taskRepository.save(task);
         return CustomMapper.toTaskResponse(updatedTask);
     }
+
 
     @Override
     public List<ObservationInfo> getObservationsForTask(Long taskId, String userEmail) {

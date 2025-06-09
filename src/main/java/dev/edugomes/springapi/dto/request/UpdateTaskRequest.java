@@ -20,6 +20,9 @@ public class UpdateTaskRequest {
 
     private Status status;
 
+    @JsonProperty("start_date")
+    private Date startDate;
+
     @JsonProperty("end_date")
     private Date endDate;
 
