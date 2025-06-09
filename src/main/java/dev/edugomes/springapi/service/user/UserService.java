@@ -3,6 +3,7 @@ package dev.edugomes.springapi.service.user;
 import dev.edugomes.springapi.dto.request.UpdateUserProfileRequest;
 import dev.edugomes.springapi.dto.response.*;
 
+
 import java.util.List;
 
 public interface UserService {
