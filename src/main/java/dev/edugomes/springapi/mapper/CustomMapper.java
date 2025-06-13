@@ -46,6 +46,7 @@ public class CustomMapper {
 
     public UserProfileResponse toUserProfileResponse(User user) {
         return UserProfileResponse.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
@@ -143,13 +144,7 @@ public class CustomMapper {
                                 .email(user.getEmail())
                                 .build())
                         .orElse(null))
-                .image(Optional.ofNullable(observation.getImage())
-                        .map(image -> ObservationResponse.ImageInfo.builder()
-                                .id(image.getId())
-                                .imageUrl(image.getImageUrl())
-                                .uploadedAt(image.getUploadedAt())
-                                .build())
-                        .orElse(null))
+                .imageUrl(observation.getImageUrl())
                 .build();
     }
 

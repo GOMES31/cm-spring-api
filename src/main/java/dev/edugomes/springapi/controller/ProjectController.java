@@ -28,7 +28,7 @@ public class ProjectController {
 
     private static final String CREATE_PROJECT = "/create";
     private static final String UPDATE_PROJECT = "/update";
-    //private static final String GET_PROJECT_BY_ID = "/{id}";
+    private static final String GET_PROJECT_BY_ID = "/{id}";
     private static final String GET_TASKS_BY_PROJECT_ID = "/{projectId}/tasks";
 
     @PostMapping(
