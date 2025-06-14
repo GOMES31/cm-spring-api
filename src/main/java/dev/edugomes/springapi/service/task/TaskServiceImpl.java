@@ -36,11 +36,21 @@ public class TaskServiceImpl implements TaskService {
                 projectRepository.findById(createTaskRequest.getProjectId())
                         .orElseThrow(() -> new ProjectNotFoundException("Project not found"));
 
-        boolean hasAccess = project.getTeam().getMembers().stream()
-                .anyMatch(member -> member.getUser().getEmail().equals(userEmail));
+        // Check if the current user has access to the project
+        TeamMember creatorTeamMember = project.getTeam().getMembers().stream()
+                .filter(member -> member.getUser().getEmail().equals(userEmail))
+                .findFirst()
+                .orElseThrow(() -> new UnauthorizedException("User does not have access to this project"));
 
-        if (!hasAccess) {
-            throw new UnauthorizedException("User does not have access to this project");
+        // Prepare the list of assignees, ensuring the creator is included
+        List<Long> assigneeIds = new ArrayList<>();
+        if (createTaskRequest.getAssigneeIds() != null) {
+            assigneeIds.addAll(createTaskRequest.getAssigneeIds());
+        }
+
+        // Add the creator's ID if not already present
+        if (!assigneeIds.contains(creatorTeamMember.getId())) {
+            assigneeIds.add(creatorTeamMember.getId());
         }
 
         Task task = Task.builder()
@@ -48,25 +58,25 @@ public class TaskServiceImpl implements TaskService {
                 .description(createTaskRequest.getDescription())
                 .status(createTaskRequest.getStatus() != null ?
                         createTaskRequest.getStatus() : Status.PENDING)
+                .startDate(createTaskRequest.getStartDate())
                 .endDate(createTaskRequest.getEndDate())
                 .project(project)
-                .assignees(new ArrayList<>())
+                .assignees(new ArrayList<>()) // Initialize assignees list
                 .observations(new ArrayList<>())
                 .build();
 
-        if (createTaskRequest.getAssigneeIds() != null &&
-                !createTaskRequest.getAssigneeIds().isEmpty()) {
+        // Fetch TeamMember objects for the final list of assignee IDs
+        if (!assigneeIds.isEmpty()) {
             List<TeamMember> assignees = new ArrayList<>();
-            for (Long assigneeId : createTaskRequest.getAssigneeIds()) {
+            for (Long assigneeId : assigneeIds) {
                 TeamMember teamMember =
                         teamMemberRepository.findById(assigneeId)
-                                .orElseThrow(() -> new TeamMemberNotFoundException("Team member not found"));
+                                .orElseThrow(() -> new TeamMemberNotFoundException("Team member not found with ID: " + assigneeId));
 
-                if
-                (!teamMember.getTeam().getId().equals(project.getTeam().getId())) {
-                    throw new UnauthorizedException("Team member does not belong to the project's team");
+                // Ensure all assignees belong to the same team as the project
+                if (!teamMember.getTeam().getId().equals(project.getTeam().getId())) {
+                    throw new UnauthorizedException("Team member with ID " + assigneeId + " does not belong to the project's team");
                 }
-
                 assignees.add(teamMember);
             }
             task.setAssignees(assignees);
@@ -114,6 +124,9 @@ public class TaskServiceImpl implements TaskService {
         if (updateTaskRequest.getStatus() != null) {
             task.setStatus(updateTaskRequest.getStatus());
         }
+        if (updateTaskRequest.getStartDate() != null) {
+            task.setStartDate(updateTaskRequest.getStartDate());
+        }
         if (updateTaskRequest.getEndDate() != null) {
             task.setEndDate(updateTaskRequest.getEndDate());
         }
@@ -125,8 +138,7 @@ public class TaskServiceImpl implements TaskService {
                         teamMemberRepository.findById(assigneeId)
                                 .orElseThrow(() -> new TeamMemberNotFoundException("Team member not found"));
 
-                if
-                (!teamMember.getTeam().getId().equals(task.getProject().getTeam().getId())) {
+                if (!teamMember.getTeam().getId().equals(task.getProject().getTeam().getId())) {
                     throw new UnauthorizedException("Team member does not belong to the project's team");
                 }
 
@@ -138,6 +150,7 @@ public class TaskServiceImpl implements TaskService {
         Task updatedTask = taskRepository.save(task);
         return CustomMapper.toTaskResponse(updatedTask);
     }
+
 
     @Override
     public List<ObservationInfo> getObservationsForTask(Long taskId, String userEmail) {
