@@ -18,7 +18,7 @@ public class ObservationResponse {
 
     private TaskInfo task;
     private UserInfo user;
-    private ImageInfo image;
+    private String imageUrl;
 
     @Data
     @Builder
@@ -35,15 +35,4 @@ public class ObservationResponse {
         private String email;
     }
 
-    @Data
-    @Builder
-    public static class ImageInfo {
-        private Long id;
-
-        @JsonProperty("image_url")
-        private String imageUrl;
-
-        @JsonProperty("uploaded_at")
-        private Date uploadedAt;
-    }
 }

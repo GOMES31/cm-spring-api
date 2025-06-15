@@ -2,6 +2,7 @@ package dev.edugomes.springapi.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,6 +36,10 @@ public class TeamMember {
     @CreationTimestamp
     @Column(name = "joined_at", updatable = false)
     private Date joinedAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Date updatedAt;
 
     @ManyToMany(mappedBy = "assignees")
     @Builder.Default

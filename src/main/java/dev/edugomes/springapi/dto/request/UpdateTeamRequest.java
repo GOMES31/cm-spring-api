@@ -10,4 +10,7 @@ public class UpdateTeamRequest {
 
     @JsonProperty("image_url")
     private String imageUrl;
+
+    @JsonProperty("updated_at")
+    private Long updatedAt;
 }

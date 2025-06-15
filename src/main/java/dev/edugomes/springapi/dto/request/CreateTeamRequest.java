@@ -12,4 +12,5 @@ public class CreateTeamRequest {
 
     @JsonProperty("image_url")
     private String imageUrl;
+
 }

@@ -12,4 +12,7 @@ public class UpdateUserProfileRequest {
 
     @JsonProperty("avatar_url")
     private String avatarUrl;
+
+    @JsonProperty("updated_at")
+    private Long updatedAt;
 }
