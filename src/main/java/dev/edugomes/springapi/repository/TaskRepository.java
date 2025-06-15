@@ -1,7 +1,7 @@
 package dev.edugomes.springapi.repository;
 
-import dev.edugomes.springapi.domain.Task;
 import dev.edugomes.springapi.domain.Observation;
+import dev.edugomes.springapi.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

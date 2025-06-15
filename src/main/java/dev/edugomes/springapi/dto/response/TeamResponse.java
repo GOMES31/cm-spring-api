@@ -1,13 +1,10 @@
 package dev.edugomes.springapi.dto.response;
 
-import dev.edugomes.springapi.domain.Project;
-import dev.edugomes.springapi.domain.TeamMember;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder

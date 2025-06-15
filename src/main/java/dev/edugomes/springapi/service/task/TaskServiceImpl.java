@@ -1,6 +1,9 @@
 package dev.edugomes.springapi.service.task;
 
-import dev.edugomes.springapi.domain.*;
+import dev.edugomes.springapi.domain.Project;
+import dev.edugomes.springapi.domain.Status;
+import dev.edugomes.springapi.domain.Task;
+import dev.edugomes.springapi.domain.TeamMember;
 import dev.edugomes.springapi.dto.request.CreateTaskRequest;
 import dev.edugomes.springapi.dto.request.UpdateTaskRequest;
 import dev.edugomes.springapi.dto.response.TaskResponse;

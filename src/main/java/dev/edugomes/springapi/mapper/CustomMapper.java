@@ -1,22 +1,11 @@
 package dev.edugomes.springapi.mapper;
 
-import dev.edugomes.springapi.domain.Team;
-import dev.edugomes.springapi.domain.TeamMember;
-import dev.edugomes.springapi.domain.User;
-import dev.edugomes.springapi.domain.Project;
-import dev.edugomes.springapi.domain.Task;
-import dev.edugomes.springapi.domain.Observation;
-import dev.edugomes.springapi.dto.response.ObservationResponse;
-import dev.edugomes.springapi.dto.response.TaskResponse;
-import dev.edugomes.springapi.dto.response.ProjectResponse;
-import dev.edugomes.springapi.dto.response.AuthResponse;
-import dev.edugomes.springapi.dto.response.RefreshResponse;
-import dev.edugomes.springapi.dto.response.TeamMemberResponse;
-import dev.edugomes.springapi.dto.response.TeamResponse;
-import dev.edugomes.springapi.dto.response.UserProfileResponse;
+import dev.edugomes.springapi.domain.*;
+import dev.edugomes.springapi.dto.response.*;
 import lombok.experimental.UtilityClass;
-import java.util.stream.Collectors;
+
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @UtilityClass

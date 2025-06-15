@@ -1,8 +1,8 @@
 package dev.edugomes.springapi.controller;
 
 import dev.edugomes.springapi.common.ApiResponse;
-import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.AddTeamMemberRequest;
+import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamMemberRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamRequest;
 import dev.edugomes.springapi.dto.response.TeamMemberResponse;

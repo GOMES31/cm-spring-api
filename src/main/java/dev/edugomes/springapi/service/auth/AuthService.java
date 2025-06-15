@@ -8,7 +8,6 @@ import dev.edugomes.springapi.dto.response.RefreshResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
-import java.util.Map;
 
 public interface AuthService {
 

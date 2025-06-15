@@ -1,6 +1,9 @@
 package dev.edugomes.springapi.service.project;
 
-import dev.edugomes.springapi.domain.*;
+import dev.edugomes.springapi.domain.Project;
+import dev.edugomes.springapi.domain.Team;
+import dev.edugomes.springapi.domain.TeamRole;
+import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.request.CreateProjectRequest;
 import dev.edugomes.springapi.dto.request.UpdateProjectRequest;
 import dev.edugomes.springapi.dto.response.ProjectResponse;

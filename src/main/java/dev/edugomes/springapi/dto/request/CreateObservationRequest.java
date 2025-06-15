@@ -1,9 +1,9 @@
 package dev.edugomes.springapi.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 @Data
 public class CreateObservationRequest {

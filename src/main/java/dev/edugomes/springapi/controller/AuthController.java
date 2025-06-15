@@ -1,8 +1,8 @@
 package dev.edugomes.springapi.controller;
 
+import dev.edugomes.springapi.common.ApiResponse;
 import dev.edugomes.springapi.dto.request.SignInRequest;
 import dev.edugomes.springapi.dto.request.SignUpRequest;
-import dev.edugomes.springapi.common.ApiResponse;
 import dev.edugomes.springapi.dto.response.AuthResponse;
 import dev.edugomes.springapi.dto.response.RefreshResponse;
 import dev.edugomes.springapi.exception.UserAlreadyExistsException;

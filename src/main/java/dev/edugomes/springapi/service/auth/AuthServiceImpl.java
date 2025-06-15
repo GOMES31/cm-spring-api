@@ -1,15 +1,15 @@
 package dev.edugomes.springapi.service.auth;
 
+import dev.edugomes.springapi.domain.Role;
 import dev.edugomes.springapi.domain.Token;
 import dev.edugomes.springapi.domain.TokenType;
+import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.request.SignInRequest;
 import dev.edugomes.springapi.dto.request.SignUpRequest;
-import dev.edugomes.springapi.exception.UserAlreadyExistsException;
-import dev.edugomes.springapi.jwt.JwtService;
-import dev.edugomes.springapi.domain.Role;
-import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.response.AuthResponse;
 import dev.edugomes.springapi.dto.response.RefreshResponse;
+import dev.edugomes.springapi.exception.UserAlreadyExistsException;
+import dev.edugomes.springapi.jwt.JwtService;
 import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.TokenRepository;
 import dev.edugomes.springapi.repository.UserRepository;
