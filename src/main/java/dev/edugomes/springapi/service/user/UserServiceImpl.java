@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if(request.getName() != null && user.getUpdatedAt() != null) {
+        if(user.getUpdatedAt() != null) {
             if(request.getUpdatedAt() < user.getUpdatedAt().getTime()) {
                 return CustomMapper.toUserProfileResponse(user);
             }
