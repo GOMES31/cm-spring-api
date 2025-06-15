@@ -9,13 +9,13 @@ import dev.edugomes.springapi.dto.response.ObservationResponse;
 import dev.edugomes.springapi.exception.ObservationNotFoundException;
 import dev.edugomes.springapi.exception.TaskNotFoundException;
 import dev.edugomes.springapi.exception.UnauthorizedException;
+import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.ObservationRepository;
 import dev.edugomes.springapi.repository.TaskRepository;
 import dev.edugomes.springapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import dev.edugomes.springapi.mapper.CustomMapper;
 
 @Service
 @RequiredArgsConstructor

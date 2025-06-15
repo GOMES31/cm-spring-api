@@ -4,23 +4,23 @@ import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.domain.TeamMember;
 import dev.edugomes.springapi.domain.TeamRole;
 import dev.edugomes.springapi.domain.User;
-import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.AddTeamMemberRequest;
+import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamMemberRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamRequest;
 import dev.edugomes.springapi.dto.response.TeamMemberResponse;
 import dev.edugomes.springapi.dto.response.TeamResponse;
-import dev.edugomes.springapi.exception.UserNotFoundException;
 import dev.edugomes.springapi.exception.TeamNotFoundException;
+import dev.edugomes.springapi.exception.UserNotFoundException;
 import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.repository.TeamMemberRepository;
 import dev.edugomes.springapi.repository.TeamRepository;
 import dev.edugomes.springapi.repository.UserRepository;
 import dev.edugomes.springapi.service.log.LogService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import static dev.edugomes.springapi.utils.GlobalMethods.getCurrentUserEmail;
 

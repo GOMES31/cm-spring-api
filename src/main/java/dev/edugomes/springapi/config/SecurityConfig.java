@@ -1,7 +1,6 @@
 package dev.edugomes.springapi.config;
 
 import dev.edugomes.springapi.jwt.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
