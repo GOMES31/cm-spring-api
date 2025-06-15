@@ -1,7 +1,6 @@
 package dev.edugomes.springapi.controller;
 
 import dev.edugomes.springapi.common.ApiResponse;
-import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.AddTeamMemberRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamMemberRequest;
@@ -11,15 +10,13 @@ import dev.edugomes.springapi.dto.response.TeamResponse;
 import dev.edugomes.springapi.exception.TeamNotFoundException;
 import dev.edugomes.springapi.exception.UserNotFoundException;
 import dev.edugomes.springapi.service.team.TeamService;
-import dev.edugomes.springapi.util.ResponseHandler;
+import dev.edugomes.springapi.utils.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/team")

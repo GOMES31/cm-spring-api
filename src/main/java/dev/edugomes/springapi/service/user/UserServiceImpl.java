@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
-import static dev.edugomes.springapi.util.GlobalMethods.getCurrentUserEmail;
+import static dev.edugomes.springapi.utils.GlobalMethods.getCurrentUserEmail;
 
 @Service
 @RequiredArgsConstructor

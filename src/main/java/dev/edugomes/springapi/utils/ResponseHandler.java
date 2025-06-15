@@ -1,4 +1,4 @@
-package dev.edugomes.springapi.util;
+package dev.edugomes.springapi.utils;
 
 import dev.edugomes.springapi.common.ApiResponse;
 import org.springframework.http.HttpStatus;

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dev.edugomes.springapi.util.GlobalMethods.getCurrentUserEmail;
+import static dev.edugomes.springapi.utils.GlobalMethods.getCurrentUserEmail;
 
 
 @Service
