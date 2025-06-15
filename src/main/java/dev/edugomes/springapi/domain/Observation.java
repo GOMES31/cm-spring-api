@@ -30,6 +30,9 @@ public class Observation {
     @Column(nullable = false)
     private String message;
 
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -37,11 +40,4 @@ public class Observation {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
-
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    @JoinColumn(name = "image_id", referencedColumnName = "id")
-    private ObservationImage image;
 }

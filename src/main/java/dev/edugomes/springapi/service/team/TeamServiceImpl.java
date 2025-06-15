@@ -8,6 +8,7 @@ import dev.edugomes.springapi.dto.request.CreateTeamRequest;
 import dev.edugomes.springapi.dto.request.AddTeamMemberRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamMemberRequest;
 import dev.edugomes.springapi.dto.request.UpdateTeamRequest;
+import dev.edugomes.springapi.dto.response.TeamMemberResponse;
 import dev.edugomes.springapi.dto.response.TeamResponse;
 import dev.edugomes.springapi.exception.UserNotFoundException;
 import dev.edugomes.springapi.exception.TeamNotFoundException;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dev.edugomes.springapi.util.GlobalMethods.getCurrentUserEmail;
+import static dev.edugomes.springapi.utils.GlobalMethods.getCurrentUserEmail;
 
 
 @Service
@@ -92,8 +93,41 @@ public class TeamServiceImpl implements TeamService {
         return CustomMapper.toTeamResponse(team);
     }
 
+
     @Override
-    public void addMember(Long teamId, AddTeamMemberRequest request) {
+    public TeamResponse updateTeam(Long teamId, UpdateTeamRequest request) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException("Team not found"));
+
+        if(team.getUpdatedAt() != null) {
+            if(request.getUpdatedAt() < team.getUpdatedAt().getTime()) {
+                return CustomMapper.toTeamResponse(team);
+            }
+        }
+
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            team.setName(request.getName());
+        }
+
+        if (request.getDepartment() != null && !request.getDepartment().isEmpty()) {
+            team.setDepartment(request.getDepartment());
+        }
+
+        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+            team.setImageUrl(request.getImageUrl());
+        }
+
+        team = teamRepository.save(team);
+
+        String email = getCurrentUserEmail();
+        logService.saveLog("Update Team Profile", email);
+
+        return CustomMapper.toTeamResponse(team);
+    }
+
+
+    @Override
+    public TeamMemberResponse addMember(Long teamId, AddTeamMemberRequest request) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("Team not found"));
 
@@ -123,31 +157,8 @@ public class TeamServiceImpl implements TeamService {
 
         String email = getCurrentUserEmail();
         logService.saveLog("Add Team Member", email);
-    }
 
-    @Override
-    public TeamResponse updateTeam(Long teamId, UpdateTeamRequest request) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new TeamNotFoundException("Team not found"));
-
-        if (request.getName() != null && !request.getName().isEmpty()) {
-            team.setName(request.getName());
-        }
-
-        if (request.getDepartment() != null && !request.getDepartment().isEmpty()) {
-            team.setDepartment(request.getDepartment());
-        }
-
-        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
-            team.setImageUrl(request.getImageUrl());
-        }
-
-        team = teamRepository.save(team);
-
-        String email = getCurrentUserEmail();
-        logService.saveLog("Update Team Profile", email);
-
-        return CustomMapper.toTeamResponse(team);
+        return CustomMapper.toTeamMemberResponse(teamMember);
     }
 
     @Override
@@ -176,10 +187,20 @@ public class TeamServiceImpl implements TeamService {
         logService.saveLog("Remove Team Member", email);
     }
 
+
+
     @Override
-    public void updateMember(Long teamId, Long memberId, UpdateTeamMemberRequest request) {
+    public TeamMemberResponse updateMember(Long teamId, Long memberId, UpdateTeamMemberRequest request) {
+
+
         TeamMember teamMember = teamMemberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Team member not found"));
+
+        if(teamMember.getUpdatedAt() != null) {
+            if(request.getUpdatedAt() < teamMember.getUpdatedAt().getTime()) {
+                return CustomMapper.toTeamMemberResponse(teamMember);
+            }
+        }
 
         if (!teamMember.getTeam().getId().equals(teamId)) {
             throw new RuntimeException("Member does not belong to the specified team");
@@ -193,6 +214,8 @@ public class TeamServiceImpl implements TeamService {
 
         String email = getCurrentUserEmail();
         logService.saveLog("Update Team Member Role", email);
+
+        return CustomMapper.toTeamMemberResponse(teamMember);
     }
 
 }

@@ -19,9 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
-import static dev.edugomes.springapi.util.GlobalMethods.getCurrentUserEmail;
+import static dev.edugomes.springapi.utils.GlobalMethods.getCurrentUserEmail;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
+        if(user.getUpdatedAt() != null) {
+            if(request.getUpdatedAt() < user.getUpdatedAt().getTime()) {
+                return CustomMapper.toUserProfileResponse(user);
+            }
+        }
+
         if (request.getName() != null && !request.getName().isEmpty()) {
             user.setName(request.getName());
         }
@@ -46,9 +53,12 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-
         if (request.getAvatarUrl() != null && !request.getAvatarUrl().isEmpty()) {
             user.setAvatarUrl(request.getAvatarUrl());
+        }
+
+        if(request.getUpdatedAt() != null){
+            user.setUpdatedAt(new Date(request.getUpdatedAt()));
         }
 
         userRepository.save(user);

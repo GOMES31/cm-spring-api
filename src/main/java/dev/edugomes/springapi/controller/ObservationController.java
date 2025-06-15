@@ -8,14 +8,14 @@ import dev.edugomes.springapi.exception.ObservationNotFoundException;
 import dev.edugomes.springapi.exception.TaskNotFoundException;
 import dev.edugomes.springapi.exception.UnauthorizedException;
 import dev.edugomes.springapi.service.observation.ObservationService;
-import dev.edugomes.springapi.util.ResponseHandler;
+import dev.edugomes.springapi.utils.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import dev.edugomes.springapi.util.GlobalMethods;
+import dev.edugomes.springapi.utils.GlobalMethods;
 
 @RestController
 @RequestMapping("/observations")

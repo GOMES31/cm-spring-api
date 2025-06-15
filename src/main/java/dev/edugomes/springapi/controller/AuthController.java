@@ -7,7 +7,7 @@ import dev.edugomes.springapi.dto.response.AuthResponse;
 import dev.edugomes.springapi.dto.response.RefreshResponse;
 import dev.edugomes.springapi.exception.UserAlreadyExistsException;
 import dev.edugomes.springapi.service.auth.AuthService;
-import dev.edugomes.springapi.util.ResponseHandler;
+import dev.edugomes.springapi.utils.ResponseHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

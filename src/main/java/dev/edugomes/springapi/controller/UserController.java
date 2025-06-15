@@ -1,7 +1,6 @@
 package dev.edugomes.springapi.controller;
 
 import dev.edugomes.springapi.common.ApiResponse;
-import dev.edugomes.springapi.domain.Team;
 import dev.edugomes.springapi.dto.request.UpdateUserProfileRequest;
 import dev.edugomes.springapi.dto.response.TeamResponse;
 import dev.edugomes.springapi.dto.response.TaskResponse;
@@ -9,9 +8,8 @@ import dev.edugomes.springapi.dto.response.ProjectResponse;
 import dev.edugomes.springapi.dto.response.ObservationResponse;
 import dev.edugomes.springapi.dto.response.UserProfileResponse;
 import dev.edugomes.springapi.exception.UserNotFoundException;
-import dev.edugomes.springapi.mapper.CustomMapper;
 import dev.edugomes.springapi.service.user.UserService;
-import dev.edugomes.springapi.util.ResponseHandler;
+import dev.edugomes.springapi.utils.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

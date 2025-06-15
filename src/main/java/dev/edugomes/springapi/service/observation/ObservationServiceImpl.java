@@ -1,7 +1,6 @@
 package dev.edugomes.springapi.service.observation;
 
 import dev.edugomes.springapi.domain.Observation;
-import dev.edugomes.springapi.domain.ObservationImage;
 import dev.edugomes.springapi.domain.Task;
 import dev.edugomes.springapi.domain.User;
 import dev.edugomes.springapi.dto.request.CreateObservationRequest;
@@ -48,18 +47,13 @@ public class ObservationServiceImpl implements ObservationService {
             throw new UnauthorizedException("User is not a member of the team associated with this task's project.");
         }
 
-        ObservationImage observationImage = null;
-        if (createObservationRequest.getImageUrl() != null && !createObservationRequest.getImageUrl().isEmpty()) {
-            observationImage = ObservationImage.builder()
-                    .imageUrl(createObservationRequest.getImageUrl())
-                    .build();
-        }
+
 
         Observation observation = Observation.builder()
                 .task(task)
                 .user(currentUser)
                 .message(createObservationRequest.getMessage())
-                .image(observationImage)
+                .imageUrl(createObservationRequest.getImageUrl())
                 .build();
 
         Observation savedObservation = observationRepository.save(observation);
@@ -99,13 +93,9 @@ public class ObservationServiceImpl implements ObservationService {
 
         if (updateObservationRequest.getImageUrl() != null) {
             if (updateObservationRequest.getImageUrl().isEmpty()) {
-                observation.setImage(null);
+                observation.setImageUrl(null);
             } else {
-                if (observation.getImage() == null) {
-                    observation.setImage(ObservationImage.builder().imageUrl(updateObservationRequest.getImageUrl()).build());
-                } else {
-                    observation.getImage().setImageUrl(updateObservationRequest.getImageUrl());
-                }
+                observation.setImageUrl(updateObservationRequest.getImageUrl());
             }
         }
 
