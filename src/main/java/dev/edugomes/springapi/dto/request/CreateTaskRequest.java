@@ -22,9 +22,6 @@ public class CreateTaskRequest {
     @JsonProperty("project_id")
     private Long projectId;
 
-    @JsonProperty("start_date")
-    private Date startDate;
-
     @JsonProperty("end_date")
     private Date endDate;
 

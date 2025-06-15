@@ -31,7 +31,7 @@ public class Task {
     @Column(nullable = false)
     private Status status;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", updatable = false)
     private Date startDate;
 
     @Column(name = "end_date")
